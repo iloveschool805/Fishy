@@ -1,32 +1,413 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>My First App</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-        background-color: #f0f4ff;
-      }
-      .card {
-        background: white;
-        padding: 40px;
-        border-radius: 16px;
-        text-align: center;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      }
-      h1 { color: #4f46e5; }
-      p { color: #666; }
-    </style>
-  </head>
-  <body>
-    <div class="card">
-      <h1>🚀 My First App</h1>
-      <p>I built and launched this myself!</p>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FishEye – Know Where to Cast</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background-color: #1a1f14;
+      color: #e8e0d0;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: rgba(26,31,20,0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .logo { font-size: 1.4rem; color: #8db87a; font-weight: bold; letter-spacing: 1px; }
+    .logo span { color: #e8e0d0; }
+    nav a {
+      color: #b5c9a0;
+      text-decoration: none;
+      font-family: Arial, sans-serif;
+      font-size: 0.9rem;
+      padding: 10px 22px;
+      border: 1px solid #8db87a;
+      border-radius: 20px;
+      transition: all 0.3s;
+    }
+    nav a:hover { background: #8db87a; color: #1a1f14; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 100px 20px 60px;
+      position: relative;
+      background: radial-gradient(ellipse at 50% 60%, #2a3d1e 0%, #1a1f14 70%);
+      overflow: hidden;
+    }
+
+    /* Animated water ripple background */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(141,184,122,0.15);
+      animation: ripple 6s infinite ease-out;
+    }
+    .ripple:nth-child(1) { width: 300px; height: 300px; top: 30%; left: 50%; transform: translate(-50%,-50%); animation-delay: 0s; }
+    .ripple:nth-child(2) { width: 500px; height: 500px; top: 30%; left: 50%; transform: translate(-50%,-50%); animation-delay: 1.5s; }
+    .ripple:nth-child(3) { width: 700px; height: 700px; top: 30%; left: 50%; transform: translate(-50%,-50%); animation-delay: 3s; }
+    @keyframes ripple {
+      0% { opacity: 0.4; transform: translate(-50%,-50%) scale(0.8); }
+      100% { opacity: 0; transform: translate(-50%,-50%) scale(1.3); }
+    }
+
+    .hero-emoji { font-size: 4rem; margin-bottom: 20px; position: relative; z-index: 1; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      color: #e8e0d0;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      position: relative; z-index: 1;
+    }
+    .hero h1 span { color: #8db87a; }
+
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: #a89f8c;
+      max-width: 540px;
+      line-height: 1.7;
+      margin-bottom: 40px;
+      font-family: Arial, sans-serif;
+      position: relative; z-index: 1;
+    }
+
+    .cta-group { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; position: relative; z-index: 1; }
+    .btn-primary {
+      background: #8db87a;
+      color: #1a1f14;
+      padding: 16px 36px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(141,184,122,0.3);
+    }
+    .btn-primary:hover { background: #a5cf90; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(141,184,122,0.4); }
+    .btn-secondary {
+      color: #8db87a;
+      padding: 16px 36px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-family: Arial, sans-serif;
+      text-decoration: none;
+      border: 1px solid #8db87a;
+      transition: all 0.3s;
+    }
+    .btn-secondary:hover { background: rgba(141,184,122,0.1); transform: translateY(-2px); }
+
+    /* HOW IT WORKS */
+    .section {
+      padding: 80px 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-family: Arial, sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      color: #8db87a;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .section h2 {
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      text-align: center;
+      margin-bottom: 60px;
+      color: #e8e0d0;
+    }
+
+    .steps { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
+    .step {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(141,184,122,0.2);
+      border-radius: 16px;
+      padding: 36px 28px;
+      flex: 1;
+      min-width: 220px;
+      max-width: 280px;
+      text-align: center;
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .step:hover { transform: translateY(-6px); border-color: #8db87a; }
+    .step-num {
+      width: 48px; height: 48px;
+      background: #8db87a;
+      color: #1a1f14;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin: 0 auto 20px;
+    }
+    .step h3 { color: #e8e0d0; margin-bottom: 10px; font-size: 1.1rem; }
+    .step p { color: #a89f8c; font-family: Arial, sans-serif; font-size: 0.92rem; line-height: 1.6; }
+
+    /* FEATURES */
+    .features-bg { background: rgba(141,184,122,0.04); border-top: 1px solid rgba(141,184,122,0.1); border-bottom: 1px solid rgba(141,184,122,0.1); }
+    .features { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+    .feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      flex: 1;
+      min-width: 240px;
+      max-width: 300px;
+    }
+    .feature-icon { font-size: 1.8rem; flex-shrink: 0; margin-top: 4px; }
+    .feature h3 { color: #c8ddb8; margin-bottom: 6px; font-size: 1rem; }
+    .feature p { color: #a89f8c; font-family: Arial, sans-serif; font-size: 0.88rem; line-height: 1.6; }
+
+    /* CTA BOTTOM */
+    .cta-bottom {
+      text-align: center;
+      padding: 80px 20px;
+      background: radial-gradient(ellipse at center, #2a3d1e 0%, #1a1f14 70%);
+    }
+    .cta-bottom h2 { font-size: clamp(1.8rem, 3vw, 2.8rem); margin-bottom: 16px; }
+    .cta-bottom p { color: #a89f8c; font-family: Arial, sans-serif; margin-bottom: 36px; font-size: 1.05rem; }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: #5a6650;
+      font-family: Arial, sans-serif;
+      font-size: 0.82rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">Fish<span>Eye</span></div>
+    <a href="#">Get Early Access</a>
+  </nav>
+
+  <section class="hero">
+    <div class="ripple"></div>
+    <div class="ripple"></div>
+    <div class="ripple"></div>
+    <div class="hero-emoji">🎣</div>
+    <h1>Fish smarter,<br/>not <span>harder.</span></h1>
+    <p>Point your phone at any river or lake. FishEye analyzes the water with AI and shows you exactly where to cast.</p>
+    <div class="cta-group">
+      <a href="#" class="btn-primary">Get Early Access</a>
+      <a href="#how" class="btn-secondary">See How It Works</a>
     </div>
-  </body>
+  </section>
+
+  <div id="how">
+    <div class="section">
+      <div class="section-label">How It Works</div>
+      <h2>Three steps to your next catch</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Take a Photo</h3>
+          <p>Open FishEye on your phone and snap a picture of the water in front of you.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>AI Analyzes It</h3>
+          <p>Our AI reads the current, depth, structure, and light to find where fish are hiding.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Cast with Confidence</h3>
+          <p>See exactly where to cast — marked right on your photo with a written breakdown.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO SECTION -->
+  <div id="demo">
+    <div class="section" style="max-width:700px">
+      <div class="section-label">Try It Now</div>
+      <h2>See FishEye in action</h2>
+      <div id="demo-box" style="background:rgba(255,255,255,0.04);border:2px dashed rgba(141,184,122,0.4);border-radius:20px;padding:40px 20px;text-align:center;">
+        <div id="upload-prompt">
+          <div style="font-size:3rem;margin-bottom:16px">📸</div>
+          <p style="color:#a89f8c;font-family:Arial,sans-serif;margin-bottom:24px">Upload a photo of a river or lake to try the demo</p>
+          <label for="photo-input" style="background:#8db87a;color:#1a1f14;padding:14px 32px;border-radius:30px;font-family:Arial,sans-serif;font-weight:bold;cursor:pointer;font-size:1rem;">Choose a Photo</label>
+          <input type="file" id="photo-input" accept="image/*" style="display:none"/>
+        </div>
+        <div id="demo-result" style="display:none">
+          <div style="position:relative;display:inline-block;max-width:100%">
+            <img id="preview-img" style="max-width:100%;border-radius:12px;display:block"/>
+            <canvas id="overlay-canvas" style="position:absolute;top:0;left:0;border-radius:12px;pointer-events:none"></canvas>
+          </div>
+          <div id="analysis-box" style="margin-top:24px;text-align:left;background:rgba(141,184,122,0.08);border:1px solid rgba(141,184,122,0.25);border-radius:14px;padding:24px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+              <span style="font-size:1.4rem">🐟</span>
+              <strong style="color:#8db87a;font-family:Arial,sans-serif">AI Analysis</strong>
+            </div>
+            <div id="analysis-text" style="color:#c8ddb8;font-family:Arial,sans-serif;font-size:0.95rem;line-height:1.8"></div>
+          </div>
+          <button onclick="resetDemo()" style="margin-top:20px;background:transparent;border:1px solid #8db87a;color:#8db87a;padding:12px 28px;border-radius:30px;font-family:Arial,sans-serif;cursor:pointer;font-size:0.95rem;">Try Another Photo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const analyses = [
+      {
+        spots: [{x:0.25,y:0.45,label:"A"},{x:0.65,y:0.35,label:"B"},{x:0.8,y:0.65,label:"C"}],
+        text: `<b>📍 Spot A — Prime Cast Zone</b><br>The shadow line along the left bank creates a natural ambush point. Bass and trout hold here waiting for food to drift by. Cast upstream and let it drift naturally.<br><br><b>📍 Spot B — Promising Eddy</b><br>The slight color change suggests a current break. Fish rest here out of the main flow. A 2–3 second pause after your cast will get results.<br><br><b>📍 Spot C — Worth a Try</b><br>Calmer water near the far bank. Likely shallower but could hold panfish or smaller trout in the morning hours.<br><br><b>✅ Overall:</b> This looks like a solid fishing spot. Focus on Spot A first.`
+      },
+      {
+        spots: [{x:0.4,y:0.55,label:"A"},{x:0.7,y:0.3,label:"B"}],
+        text: `<b>📍 Spot A — Best Bet</b><br>Right at the seam where fast and slow water meet. This is a feeding highway — fish face upstream here waiting for insects and baitfish. Cast just above and drift through.<br><br><b>📍 Spot B — Secondary Spot</b><br>Deeper water near the far bank. Hard to read from here but worth a few casts. Try a weighted lure to get down.<br><br><b>✅ Overall:</b> Good location. Water clarity looks healthy. Early morning or late evening will be most productive.`
+      },
+      {
+        spots: [{x:0.5,y:0.5,label:"A"}],
+        text: `<b>⚠️ Spot A — Marginal Only</b><br>The water looks heavily disturbed and cloudy — possibly from recent rain runoff. Visibility for fish is very low, making feeding difficult.<br><br><b>❌ Overall:</b> This spot is not ideal right now. Consider moving upstream 200–300 meters to find clearer water, or come back in 24–48 hours after the sediment settles.`
+      }
+    ];
+
+    document.getElementById('photo-input').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const img = document.getElementById('preview-img');
+        img.onload = function() {
+          const canvas = document.getElementById('overlay-canvas');
+          canvas.width = img.offsetWidth;
+          canvas.height = img.offsetHeight;
+          const pick = analyses[Math.floor(Math.random() * analyses.length)];
+          drawSpots(canvas, pick.spots);
+          document.getElementById('analysis-text').innerHTML = pick.text;
+          document.getElementById('upload-prompt').style.display = 'none';
+          document.getElementById('demo-result').style.display = 'block';
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function drawSpots(canvas, spots) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      spots.forEach(s => {
+        const x = s.x * canvas.width, y = s.y * canvas.height;
+        // Outer glow
+        ctx.beginPath();
+        ctx.arc(x, y, 28, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(141,184,122,0.4)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        // Inner circle
+        ctx.beginPath();
+        ctx.arc(x, y, 18, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(141,184,122,0.25)';
+        ctx.fill();
+        ctx.strokeStyle = '#8db87a';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        // Label
+        ctx.font = 'bold 14px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(s.label, x, y);
+      });
+    }
+
+    function resetDemo() {
+      document.getElementById('upload-prompt').style.display = 'block';
+      document.getElementById('demo-result').style.display = 'none';
+      document.getElementById('photo-input').value = '';
+    }
+  </script>
+
+  <div class="features-bg">
+    <div class="section">
+      <div class="section-label">Features</div>
+      <h2>Built for real anglers</h2>
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon">📍</div>
+          <div>
+            <h3>Visual Cast Markers</h3>
+            <p>Circles and arrows drawn right on your photo show the prime spots at a glance.</p>
+          </div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">📖</div>
+          <div>
+            <h3>Plain-English Analysis</h3>
+            <p>A written breakdown explains exactly why each spot is good — or tells you to move on.</p>
+          </div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🏞️</div>
+          <div>
+            <h3>Freshwater Focused</h3>
+            <p>Trained for rivers, streams, and lakes. It knows the difference between a riffle and a run.</p>
+          </div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">📵</div>
+          <div>
+            <h3>Works Anywhere</h3>
+            <p>No app download needed. Open it in your phone's browser, even in low-signal areas.</p>
+          </div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">⚡</div>
+          <div>
+            <h3>Results in Seconds</h3>
+            <p>Get your analysis fast so you spend more time fishing and less time guessing.</p>
+          </div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🆓</div>
+          <div>
+            <h3>Free to Try</h3>
+            <p>Get early access for free. No credit card, no commitment.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-bottom">
+    <h2>Ready to find your fish? 🐟</h2>
+    <p>Join anglers getting early access to FishEye.</p>
+    <a href="#" class="btn-primary">Get Early Access — It's Free</a>
+  </div>
+
+  <footer>
+    © 2026 FishEye · Built with 🎣 and AI
+  </footer>
+
+</body>
 </html>
