@@ -277,38 +277,102 @@
   </div>
 
   <script>
-    const analyses = [
-      {
-        spots: [{x:0.25,y:0.45,label:"A"},{x:0.65,y:0.35,label:"B"},{x:0.8,y:0.65,label:"C"}],
-        text: `<b>📍 Spot A — Prime Cast Zone</b><br>The shadow line along the left bank creates a natural ambush point. Bass and trout hold here waiting for food to drift by. Cast upstream and let it drift naturally.<br><br><b>📍 Spot B — Promising Eddy</b><br>The slight color change suggests a current break. Fish rest here out of the main flow. A 2–3 second pause after your cast will get results.<br><br><b>📍 Spot C — Worth a Try</b><br>Calmer water near the far bank. Likely shallower but could hold panfish or smaller trout in the morning hours.<br><br><b>✅ Overall:</b> This looks like a solid fishing spot. Focus on Spot A first.`
-      },
-      {
-        spots: [{x:0.4,y:0.55,label:"A"},{x:0.7,y:0.3,label:"B"}],
-        text: `<b>📍 Spot A — Best Bet</b><br>Right at the seam where fast and slow water meet. This is a feeding highway — fish face upstream here waiting for insects and baitfish. Cast just above and drift through.<br><br><b>📍 Spot B — Secondary Spot</b><br>Deeper water near the far bank. Hard to read from here but worth a few casts. Try a weighted lure to get down.<br><br><b>✅ Overall:</b> Good location. Water clarity looks healthy. Early morning or late evening will be most productive.`
-      },
-      {
-        spots: [{x:0.5,y:0.5,label:"A"}],
-        text: `<b>⚠️ Spot A — Marginal Only</b><br>The water looks heavily disturbed and cloudy — possibly from recent rain runoff. Visibility for fish is very low, making feeding difficult.<br><br><b>❌ Overall:</b> This spot is not ideal right now. Consider moving upstream 200–300 meters to find clearer water, or come back in 24–48 hours after the sediment settles.`
-      }
-    ];
+    let imgBase64 = null;
 
     document.getElementById('photo-input').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(ev) {
+      reader.onload = async function(ev) {
+        imgBase64 = ev.target.result.split(',')[1];
         const img = document.getElementById('preview-img');
-        img.onload = function() {
-          const canvas = document.getElementById('overlay-canvas');
-          canvas.width = img.offsetWidth;
-          canvas.height = img.offsetHeight;
-          const pick = analyses[Math.floor(Math.random() * analyses.length)];
-          drawSpots(canvas, pick.spots);
-          document.getElementById('analysis-text').innerHTML = pick.text;
+        img.src = ev.target.result;
+        img.onload = async function() {
           document.getElementById('upload-prompt').style.display = 'none';
           document.getElementById('demo-result').style.display = 'block';
+          document.getElementById('analysis-box').innerHTML = `<div style="text-align:center;padding:20px;color:#8db87a;font-family:Arial,sans-serif">🔍 Analyzing your water... hang tight!</div>`;
+
+          try {
+            const resp = await fetch('https://api.anthropic.com/v1/messages', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                model: 'claude-sonnet-4-6',
+                max_tokens: 1000,
+                messages: [{
+                  role: 'user',
+                  content: [
+                    {
+                      type: 'image',
+                      source: { type: 'base64', media_type: 'image/jpeg', data: imgBase64 }
+                    },
+                    {
+                      type: 'text',
+                      text: `You are an expert freshwater fishing guide analyzing a photo of a river or lake. 
+Look at this image carefully and identify 1-3 specific spots where fish are most likely to be.
+
+Respond ONLY with a valid JSON object in this exact format, no other text:
+{
+  "isWater": true,
+  "spots": [
+    { "x": 0.3, "y": 0.6, "label": "A", "name": "Spot Name", "reason": "One sentence why fish would be here." },
+    { "x": 0.7, "y": 0.4, "label": "B", "name": "Spot Name", "reason": "One sentence why fish would be here." }
+  ],
+  "overall": "2-3 sentence overall assessment of this fishing location.",
+  "rating": "Good" 
+}
+
+x and y are positions from 0 to 1 (0,0 = top left, 1,1 = bottom right). Place them precisely over the actual fishing spots you see.
+rating must be one of: "Excellent", "Good", "Fair", or "Poor".
+If the image is NOT a body of water, set isWater to false and return empty spots array.`
+                    }
+                  ]
+                }]
+              })
+            });
+
+            const data = await resp.json();
+            const raw = data.content.map(i => i.text || '').join('');
+            const clean = raw.replace(/```json|```/g, '').trim();
+            const result = JSON.parse(clean);
+
+            const canvas = document.getElementById('overlay-canvas');
+            canvas.width = img.offsetWidth;
+            canvas.height = img.offsetHeight;
+
+            if (!result.isWater) {
+              document.getElementById('analysis-box').innerHTML = `
+                <div style="font-family:Arial,sans-serif;color:#c8ddb8">
+                  <b style="color:#e88a6a">⚠️ No water detected</b><br><br>
+                  This doesn't look like a river or lake. Try uploading a photo of the water you're fishing!
+                </div>`;
+              return;
+            }
+
+            drawSpots(canvas, result.spots);
+
+            const ratingColor = { Excellent:'#8db87a', Good:'#a5cf90', Fair:'#d4a843', Poor:'#e88a6a' }[result.rating] || '#8db87a';
+            let spotsHTML = result.spots.map(s => `
+              <div style="margin-bottom:14px">
+                <b style="color:#8db87a">📍 Spot ${s.label} — ${s.name}</b><br>
+                <span style="color:#c8ddb8">${s.reason}</span>
+              </div>`).join('');
+
+            document.getElementById('analysis-box').innerHTML = `
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+                <span style="font-size:1.4rem">🐟</span>
+                <strong style="color:#8db87a;font-family:Arial,sans-serif">AI Analysis</strong>
+                <span style="margin-left:auto;background:${ratingColor};color:#1a1f14;padding:4px 14px;border-radius:20px;font-size:0.8rem;font-weight:bold;font-family:Arial,sans-serif">${result.rating}</span>
+              </div>
+              <div style="color:#c8ddb8;font-family:Arial,sans-serif;font-size:0.95rem;line-height:1.8">
+                ${spotsHTML}
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(141,184,122,0.2);color:#a89f8c">${result.overall}</div>
+              </div>`;
+
+          } catch(err) {
+            document.getElementById('analysis-box').innerHTML = `<div style="color:#e88a6a;font-family:Arial,sans-serif;padding:16px">Something went wrong with the analysis. Please try again.</div>`;
+          }
         };
-        img.src = ev.target.result;
       };
       reader.readAsDataURL(file);
     });
