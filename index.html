@@ -1,477 +1,1195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FishEye – Know Where to Cast</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Georgia', serif;
-      background-color: #1a1f14;
-      color: #e8e0d0;
-      overflow-x: hidden;
-    }
-
-    /* NAV */
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 40px;
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      background: rgba(26,31,20,0.85);
-      backdrop-filter: blur(8px);
-      z-index: 100;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .logo { font-size: 1.4rem; color: #8db87a; font-weight: bold; letter-spacing: 1px; }
-    .logo span { color: #e8e0d0; }
-    nav a {
-      color: #b5c9a0;
-      text-decoration: none;
-      font-family: Arial, sans-serif;
-      font-size: 0.9rem;
-      padding: 10px 22px;
-      border: 1px solid #8db87a;
-      border-radius: 20px;
-      transition: all 0.3s;
-    }
-    nav a:hover { background: #8db87a; color: #1a1f14; }
-
-    /* HERO */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 100px 20px 60px;
-      position: relative;
-      background: radial-gradient(ellipse at 50% 60%, #2a3d1e 0%, #1a1f14 70%);
-      overflow: hidden;
-    }
-
-    /* Animated water ripple background */
-    .ripple {
-      position: absolute;
-      border-radius: 50%;
-      border: 1px solid rgba(141,184,122,0.15);
-      animation: ripple 6s infinite ease-out;
-    }
-    .ripple:nth-child(1) { width: 300px; height: 300px; top: 30%; left: 50%; transform: translate(-50%,-50%); animation-delay: 0s; }
-    .ripple:nth-child(2) { width: 500px; height: 500px; top: 30%; left: 50%; transform: translate(-50%,-50%); animation-delay: 1.5s; }
-    .ripple:nth-child(3) { width: 700px; height: 700px; top: 30%; left: 50%; transform: translate(-50%,-50%); animation-delay: 3s; }
-    @keyframes ripple {
-      0% { opacity: 0.4; transform: translate(-50%,-50%) scale(0.8); }
-      100% { opacity: 0; transform: translate(-50%,-50%) scale(1.3); }
-    }
-
-    .hero-emoji { font-size: 4rem; margin-bottom: 20px; position: relative; z-index: 1; animation: float 3s ease-in-out infinite; }
-    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-
-    .hero h1 {
-      font-size: clamp(2.5rem, 6vw, 5rem);
-      color: #e8e0d0;
-      line-height: 1.1;
-      margin-bottom: 16px;
-      position: relative; z-index: 1;
-    }
-    .hero h1 span { color: #8db87a; }
-
-    .hero p {
-      font-size: clamp(1rem, 2vw, 1.3rem);
-      color: #a89f8c;
-      max-width: 540px;
-      line-height: 1.7;
-      margin-bottom: 40px;
-      font-family: Arial, sans-serif;
-      position: relative; z-index: 1;
-    }
-
-    .cta-group { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; position: relative; z-index: 1; }
-    .btn-primary {
-      background: #8db87a;
-      color: #1a1f14;
-      padding: 16px 36px;
-      border-radius: 30px;
-      font-size: 1rem;
-      font-family: Arial, sans-serif;
-      font-weight: bold;
-      text-decoration: none;
-      transition: all 0.3s;
-      box-shadow: 0 4px 20px rgba(141,184,122,0.3);
-    }
-    .btn-primary:hover { background: #a5cf90; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(141,184,122,0.4); }
-    .btn-secondary {
-      color: #8db87a;
-      padding: 16px 36px;
-      border-radius: 30px;
-      font-size: 1rem;
-      font-family: Arial, sans-serif;
-      text-decoration: none;
-      border: 1px solid #8db87a;
-      transition: all 0.3s;
-    }
-    .btn-secondary:hover { background: rgba(141,184,122,0.1); transform: translateY(-2px); }
-
-    /* HOW IT WORKS */
-    .section {
-      padding: 80px 20px;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    .section-label {
-      font-family: Arial, sans-serif;
-      font-size: 0.8rem;
-      letter-spacing: 3px;
-      color: #8db87a;
-      text-transform: uppercase;
-      text-align: center;
-      margin-bottom: 12px;
-    }
-    .section h2 {
-      font-size: clamp(1.8rem, 3vw, 2.8rem);
-      text-align: center;
-      margin-bottom: 60px;
-      color: #e8e0d0;
-    }
-
-    .steps { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
-    .step {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(141,184,122,0.2);
-      border-radius: 16px;
-      padding: 36px 28px;
-      flex: 1;
-      min-width: 220px;
-      max-width: 280px;
-      text-align: center;
-      transition: transform 0.3s, border-color 0.3s;
-    }
-    .step:hover { transform: translateY(-6px); border-color: #8db87a; }
-    .step-num {
-      width: 48px; height: 48px;
-      background: #8db87a;
-      color: #1a1f14;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-family: Arial, sans-serif;
-      font-weight: bold;
-      font-size: 1.1rem;
-      margin: 0 auto 20px;
-    }
-    .step h3 { color: #e8e0d0; margin-bottom: 10px; font-size: 1.1rem; }
-    .step p { color: #a89f8c; font-family: Arial, sans-serif; font-size: 0.92rem; line-height: 1.6; }
-
-    /* FEATURES */
-    .features-bg { background: rgba(141,184,122,0.04); border-top: 1px solid rgba(141,184,122,0.1); border-bottom: 1px solid rgba(141,184,122,0.1); }
-    .features { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
-    .feature {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      flex: 1;
-      min-width: 240px;
-      max-width: 300px;
-    }
-    .feature-icon { font-size: 1.8rem; flex-shrink: 0; margin-top: 4px; }
-    .feature h3 { color: #c8ddb8; margin-bottom: 6px; font-size: 1rem; }
-    .feature p { color: #a89f8c; font-family: Arial, sans-serif; font-size: 0.88rem; line-height: 1.6; }
-
-    /* CTA BOTTOM */
-    .cta-bottom {
-      text-align: center;
-      padding: 80px 20px;
-      background: radial-gradient(ellipse at center, #2a3d1e 0%, #1a1f14 70%);
-    }
-    .cta-bottom h2 { font-size: clamp(1.8rem, 3vw, 2.8rem); margin-bottom: 16px; }
-    .cta-bottom p { color: #a89f8c; font-family: Arial, sans-serif; margin-bottom: 36px; font-size: 1.05rem; }
-
-    /* FOOTER */
-    footer {
-      text-align: center;
-      padding: 24px;
-      color: #5a6650;
-      font-family: Arial, sans-serif;
-      font-size: 0.82rem;
-      border-top: 1px solid rgba(255,255,255,0.05);
-    }
-  </style>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="referrer" content="no-referrer"/>
+<title>Voyager — AI Trip Planner</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Nunito+Sans:ital,opsz,wght@0,6..12,300;0,6..12,400;0,6..12,500;0,6..12,600;0,6..12,700;1,6..12,400&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#e0b658;--gl:#f5d488;--sb-w:56px;
+  --bg:#141021;--bg2:#1d1830;--bg3:#2a2342;
+  --surface:rgba(255,255,255,0.05);--surface2:rgba(255,255,255,0.03);
+  --border:rgba(224,182,88,0.18);--border2:rgba(224,182,88,0.12);
+  --text:#faf4ea;--text2:rgba(250,244,234,0.6);--dim:#9d93b5;
+  --sb-bg:#181226;--panel-bg:#1a142a;
+  --card-bg:rgba(255,255,255,0.03);--card-border:rgba(224,182,88,0.13);
+  --nav-bg:rgba(20,16,33,0.92);
+  --green:#5fd494;--red:#f07a6a;--coral:#f4936f;--teal:#5cc4c4;--pink:#e88ab0;--lav:#a89ae8;
+  --r:18px;--rs:12px;--rl:26px;--blob:42% 58% 63% 37% / 41% 44% 56% 59%;
+}
+body[data-theme="light"]{
+  --gold:#b8842e;--gl:#d4a544;
+  --bg:#fdf8f0;--bg2:#f7f0e3;--bg3:#efe4d2;
+  --surface:rgba(184,132,46,0.06);--surface2:rgba(184,132,46,0.035);
+  --border:rgba(184,132,46,0.2);--border2:rgba(184,132,46,0.13);
+  --text:#2a2014;--text2:rgba(42,32,20,0.6);--dim:#8a7c66;
+  --sb-bg:#332a1b;--panel-bg:#fbf5ea;
+  --card-bg:rgba(184,132,46,0.05);--card-border:rgba(184,132,46,0.16);
+  --nav-bg:rgba(253,248,240,0.95);
+  --green:#3a9e63;--red:#d85a48;--coral:#e07850;--teal:#3a9a9a;--pink:#cc6090;--lav:#8070c8;
+}
+body[data-theme="light"] .hbg{background:linear-gradient(135deg,#e8dcc8 0%,#d4c8b0 40%,#c8b898 70%,#e0d4bc 100%)}
+body[data-theme="light"] .orb1{background:rgba(160,116,42,0.1)}
+body[data-theme="light"] .orb2{background:rgba(120,80,20,0.08)}
+body[data-theme="light"] .orb3{background:rgba(160,116,42,0.07)}
+body[data-theme="light"] .hbadge{background:rgba(140,100,40,0.1);border-color:rgba(140,100,40,0.3)}
+body[data-theme="light"] .hero h1{color:#1c160c}
+body[data-theme="light"] .sc{background:rgba(255,255,255,0.75);border-color:rgba(140,100,40,0.25)}
+body[data-theme="light"] .sc:focus-within{border-color:var(--gold)}
+body[data-theme="light"] .sbtn{box-shadow:0 2px 12px rgba(140,100,40,0.25)}
+body[data-theme="light"] .tt{background:rgba(255,255,255,0.6);border-color:rgba(140,100,40,0.2)}
+body[data-theme="light"] .tt.active{background:rgba(140,100,40,0.1);border-color:var(--gold)}
+body[data-theme="light"] .ip{background:rgba(255,255,255,0.7);border-color:rgba(140,100,40,0.15)}
+body[data-theme="light"] .hcard{background:rgba(255,255,255,0.7);border-color:rgba(140,100,40,0.15)}
+body[data-theme="light"] .hcard:hover{background:rgba(255,255,255,0.9);border-color:rgba(140,100,40,0.35)}
+body[data-theme="light"] .cpanel{background:rgba(255,255,255,0.6);border-color:rgba(140,100,40,0.2)}
+body[data-theme="light"] .fi{background:rgba(255,255,255,0.5);border-color:rgba(140,100,40,0.12)}
+body[data-theme="light"] .fi:hover{background:rgba(255,255,255,0.85);border-color:rgba(140,100,40,0.25)}
+body[data-theme="light"] .mtab{color:var(--dim)}
+body[data-theme="light"] .mtab.active{color:var(--gold);border-bottom-color:var(--gold)}
+body[data-theme="light"] .pp-lbl{color:rgba(140,100,40,0.7)}
+body[data-theme="light"] .pp-stat{background:rgba(140,100,40,0.06);border-color:rgba(140,100,40,0.15)}
+body[data-theme="light"] .theme-row{background:rgba(140,100,40,0.05);border-color:rgba(140,100,40,0.18)}
+body[data-theme="light"] .tbtn.active{background:rgba(140,100,40,0.15);color:var(--gold)}
+body[data-theme="light"] .pill{background:rgba(140,100,40,0.1);border-color:rgba(140,100,40,0.2)}
+body[data-theme="light"] .pill.on{background:rgba(140,100,40,0.3);border-color:rgba(140,100,40,0.5)}
+body[data-theme="light"] .h-card{background:rgba(255,255,255,0.6);border-color:rgba(140,100,40,0.15)}
+body[data-theme="light"] .h-card:hover{background:rgba(255,255,255,0.9);border-color:rgba(140,100,40,0.3)}
+body[data-theme="light"] .actn-btn{background:rgba(255,255,255,0.5);border-color:rgba(140,100,40,0.18)}
+body[data-theme="light"] .edit-field input,body[data-theme="light"] .edit-field textarea,body[data-theme="light"] .edit-field select{background:rgba(255,255,255,0.8);border-color:rgba(140,100,40,0.2)}
+body[data-theme="light"] .help-topic{border-color:rgba(140,100,40,0.12)}
+body[data-theme="light"] .data-action-btn{background:rgba(255,255,255,0.5);border-color:rgba(140,100,40,0.18)}
+body[data-theme="light"] .dtab{border-color:rgba(140,100,40,0.2);color:var(--dim)}
+body[data-theme="light"] .dtab.active{border-color:var(--gold);color:var(--gold);background:rgba(140,100,40,0.08)}
+body[data-theme="light"] .tc{border-left-color:rgba(140,100,40,0.2)}
+body[data-theme="light"] nav{box-shadow:0 1px 12px rgba(100,70,20,0.08)}
+body[data-theme="light"] .pn{color:#8a6820}
+body[data-theme="light"] .gdot{background:var(--gold)}
+body[data-theme="light"] .pbadge{border-color:rgba(140,100,40,0.3);color:var(--gold);background:rgba(140,100,40,0.08)}
+body[data-theme="light"] .ttag{color:var(--gold);border-color:rgba(140,100,40,0.25)}
+body[data-theme="light"] .htg{background:rgba(140,100,40,0.05);border-color:rgba(140,100,40,0.15);color:var(--dim)}
+body[data-theme="light"] .hfit{color:rgba(140,100,40,0.7)}
+body[data-theme="light"] .feats{background:linear-gradient(to bottom,var(--bg),var(--bg2))}
+body[data-theme="light"] .dests{background:var(--bg2)}
+body[data-theme="light"] .fn{color:rgba(140,100,40,0.08)}
+body[data-theme="light"] .livebadge{background:rgba(40,160,80,0.1);border-color:rgba(40,160,80,0.3);color:#2a9050}
+body[data-theme="light"] .nc{background:rgba(255,255,255,0.5);border-color:rgba(140,100,40,0.15)}
+body[data-theme="light"] .nc:hover{border-color:rgba(140,100,40,0.35)}
+body[data-theme="light"] #rs{background:transparent}
+body[data-theme="light"] .rh{border-bottom-color:rgba(140,100,40,0.15)}
+body[data-theme="light"] .lb{background:rgba(140,100,40,0.1)}
+body[data-theme="light"] #sidebar{border-right-color:rgba(140,100,40,0.15);background:#faf7f2}
+body[data-theme="light"] #pp{background:#faf7f2;border-right-color:rgba(140,100,40,0.15)}
+body[data-theme="light"] .sb-logo{color:var(--gold)}
+body[data-theme="light"] .sb-avatar{background:rgba(140,100,40,0.08);border-color:rgba(140,100,40,0.35);color:var(--gold)}
+body[data-theme="light"] .sb-btn{color:var(--dim)}
+body[data-theme="light"] .sb-btn:hover{background:rgba(140,100,40,0.08);color:var(--text)}
+body[data-theme="light"] .sb-btn.active{background:rgba(140,100,40,0.12);color:var(--gold)}
+body[data-theme="light"] .sb-divider{background:rgba(140,100,40,0.12)}
+body[data-theme="light"] .sb-sec{color:rgba(140,100,40,0.45)}
+body[data-theme="light"] .sb-close{color:var(--dim)}
+body[data-theme="light"] .sb-close:hover{color:var(--text)}
+body[data-theme="light"] .sb-logout{color:rgba(200,70,55,0.6)}
+body[data-theme="light"] .tip{background:#faf7f2;border-color:rgba(140,100,40,0.2);color:var(--text)}
+body[data-theme="light"] .dna-banner{background:linear-gradient(135deg,rgba(140,100,40,0.12),rgba(140,100,40,0.03));border-color:rgba(140,100,40,0.3)}
+body[data-theme="light"] .dna-chip,body[data-theme="light"] .dna-opt{background:rgba(255,255,255,0.6);border-color:rgba(140,100,40,0.18)}
+body[data-theme="light"] .dna-chip.on,body[data-theme="light"] .dna-opt.on{background:rgba(140,100,40,0.15);border-color:var(--gold);color:var(--gold)}
+body[data-theme="light"] .archetype-card{background:linear-gradient(135deg,rgba(140,100,40,0.13),rgba(140,100,40,0.02));border-color:rgba(140,100,40,0.35)}
+body[data-theme="light"] .dna-input{background:rgba(255,255,255,0.7);border-color:rgba(140,100,40,0.2)}
+body[data-theme="light"] .dna-memory{background:rgba(255,255,255,0.5);border-color:rgba(140,100,40,0.18)}
+body[data-theme="light"] .rv-section{background:rgba(255,255,255,0.5);border-color:rgba(140,100,40,0.18)}
+body[data-theme="light"] .rv-textarea{background:rgba(255,255,255,0.8);border-color:rgba(140,100,40,0.2)}
+body[data-theme="light"] .rv-insight{background:rgba(140,100,40,0.04);border-color:rgba(140,100,40,0.15)}
+body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;transition:background 0.3s,color 0.3s}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sb-w);background:var(--sb-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:16px 0 12px;gap:4px;z-index:300;transition:width 0.3s cubic-bezier(.4,0,.2,1),background 0.3s;overflow:hidden}
+#sidebar.open{width:280px}
+.sb-logo{font-family:'Playfair Display',serif;font-size:0.85rem;color:var(--gold);letter-spacing:3px;white-space:nowrap;margin-bottom:8px;width:var(--sb-w);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.3s;cursor:pointer;padding:4px 0}
+#sidebar.open .sb-logo{width:280px;padding:0 16px;justify-content:space-between;font-size:1rem}
+.sb-close{display:none;background:none;border:none;color:var(--dim);cursor:pointer;font-size:1rem;line-height:1;padding:2px 4px}
+#sidebar.open .sb-close{display:block}
+.sb-avatar{width:34px;height:34px;border-radius:50%;background:rgba(201,168,76,0.1);border:1.5px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:0.78rem;color:var(--gold);cursor:pointer;flex-shrink:0;pointer-events:none}
+.sb-divider{width:32px;height:1px;background:rgba(201,168,76,0.1);margin:4px 0;flex-shrink:0;transition:width 0.3s}
+#sidebar.open .sb-divider{width:248px}
+.sb-btn{width:38px;height:38px;border-radius:5px;background:none;border:none;color:var(--dim);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;position:relative}
+.sb-btn:hover{background:rgba(201,168,76,0.08);color:var(--text)}
+.sb-btn.active{background:rgba(201,168,76,0.12);color:var(--gold)}
+.sb-btn svg{width:18px;height:18px;flex-shrink:0}
+.tip{position:absolute;left:48px;top:50%;transform:translateY(-50%);background:#111525;border:1px solid rgba(201,168,76,0.2);color:var(--text);font-size:0.68rem;padding:4px 10px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;border-radius:3px;z-index:400}
+#sidebar:not(.open) .sb-btn:hover .tip{opacity:1}
+#sidebar.open .sb-btn{width:100%;height:40px;padding:0 14px;gap:12px;justify-content:flex-start;border-radius:4px}
+#sidebar.open .sb-btn .tip{display:none}
+.nav-label{display:none;font-size:0.78rem;letter-spacing:0.3px;white-space:nowrap}
+#sidebar.open .nav-label{display:block}
+.sb-sec{display:none;font-size:0.56rem;letter-spacing:2px;text-transform:uppercase;color:rgba(201,168,76,0.45);padding:8px 14px 2px;align-self:flex-start;white-space:nowrap}
+#sidebar.open .sb-sec{display:block}
+.sb-spacer{flex:1}
+.sb-logout{color:rgba(224,96,80,0.55)}
+.sb-logout:hover{color:#e06050;background:rgba(224,96,80,0.06)!important}
+#pp{position:fixed;top:0;left:var(--sb-w);bottom:0;width:0;overflow:hidden;background:var(--panel-bg);border-right:1px solid var(--border2);z-index:290;transition:width 0.3s cubic-bezier(.4,0,.2,1),background 0.3s}
+#pp.open{width:310px}
+.pp-inner{width:310px;height:100%;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(201,168,76,0.15) transparent;display:flex;flex-direction:column}
+.pp-head{padding:18px 18px 14px;border-bottom:1px solid var(--border2)}
+.pp-sec{padding:12px 18px;border-bottom:1px solid rgba(201,168,76,0.08)}
+.pp-lbl{font-size:0.68rem;letter-spacing:0.3px;color:var(--gold);margin-bottom:10px;opacity:0.8;font-weight:500}
+.pp-user{display:flex;align-items:center;gap:11px}
+.pp-av{width:46px;height:46px;border-radius:50%;background:rgba(201,168,76,0.1);border:1.5px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold);flex-shrink:0}
+.pp-name{font-size:0.88rem;font-weight:500;color:var(--gold);margin-bottom:2px}
+.pp-tier{font-size:0.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:4px}
+.tdot{width:4px;height:4px;border-radius:50%;background:var(--gold);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.pp-email{font-size:0.66rem;color:var(--dim);margin-top:3px}
+.pp-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px}
+.pp-stat{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--rs);padding:9px 5px;text-align:center}
+.pp-sn{font-size:0.95rem;font-weight:500;color:var(--gold);display:block}
+.pp-sl{font-size:0.56rem;letter-spacing:1px;text-transform:uppercase;color:var(--dim)}
+.theme-row{display:flex;background:var(--surface);border:1px solid var(--border2);border-radius:3px;overflow:hidden}
+.tbtn{flex:1;padding:7px 0;background:none;border:none;color:var(--dim);font-family:'Inter',sans-serif;font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px}
+.tbtn.active{background:rgba(201,168,76,0.15);color:var(--gold);font-weight:600}
+.pref-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;cursor:pointer;user-select:none}
+.pref-l{display:flex;align-items:center;gap:8px;font-size:0.76rem;color:var(--text)}
+.pref-ico{width:24px;height:24px;background:var(--surface);border:1px solid var(--border2);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.pill{width:32px;height:17px;border-radius:9px;background:var(--surface);border:1px solid rgba(255,255,255,0.1);position:relative;flex-shrink:0;transition:background 0.2s}
+.pill.on{background:rgba(201,168,76,0.4);border-color:rgba(201,168,76,0.6)}
+.knob{position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;background:var(--dim);transition:transform 0.2s,background 0.2s}
+.pill.on .knob{transform:translateX(15px);background:var(--gold)}
+.h-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--rs);padding:10px 12px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.h-card:hover{border-color:rgba(224,182,88,0.35);background:rgba(224,182,88,0.06);transform:translateX(2px)}
+.h-em{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--surface);border:1px solid var(--border2);border-radius:3px;font-size:1rem;flex-shrink:0}
+.h-inf{flex:1;min-width:0}
+.h-dest{font-family:'Playfair Display',serif;font-size:0.8rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-meta{font-size:0.6rem;color:var(--dim);margin-top:1px}
+.h-stars{font-size:0.6rem;color:var(--gold);flex-shrink:0}
+.pp-flink{display:flex;align-items:center;gap:8px;font-size:0.72rem;color:var(--dim);padding:6px 8px;border-radius:3px;cursor:pointer;transition:all 0.2s}
+.pp-flink:hover{background:var(--surface);color:var(--text)}
+.pp-flink.red:hover{color:#e06050;background:rgba(224,96,80,0.06)}
+.back-btn{background:none;border:none;color:var(--dim);cursor:pointer;font-size:0.76rem;padding:0;margin-right:4px}
+.back-btn:hover{color:var(--text)}
+.pp-foot{margin-top:auto;padding:12px 18px;border-top:1px solid var(--border2)}
+.actn-btn{display:flex;align-items:center;gap:8px;font-size:0.72rem;color:var(--text2);padding:8px 10px;border:1px solid var(--border2);border-radius:3px;cursor:pointer;transition:all 0.2s;margin-bottom:5px}
+.actn-btn:hover{border-color:rgba(201,168,76,0.3);color:var(--text)}
+.dna-banner{position:relative;background:linear-gradient(135deg,rgba(240,168,90,0.14),rgba(244,132,95,0.05));border:1px solid rgba(240,168,90,0.35);border-radius:16px;padding:14px 14px 12px;cursor:pointer;overflow:hidden;transition:all 0.3s}
+.dna-banner:hover{border-color:rgba(240,168,90,0.6);transform:translateY(-2px)}
+.dna-banner-glow{position:absolute;top:-40%;right:-20%;width:160px;height:160px;background:radial-gradient(circle,rgba(201,168,76,0.25),transparent 70%);filter:blur(20px);pointer-events:none;animation:dnaPulse 4s ease-in-out infinite}
+@keyframes dnaPulse{0%,100%{opacity:0.5;transform:scale(1)}50%{opacity:0.9;transform:scale(1.15)}}
+.dna-banner-content{position:relative;display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.dna-banner-icon{font-size:1.5rem;flex-shrink:0}
+.dna-banner-title{font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--text);font-weight:600}
+.dna-banner-sub{font-size:0.66rem;color:var(--gold);letter-spacing:0.5px;margin-top:1px}
+.dna-banner-pct{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);font-weight:700;flex-shrink:0}
+.dna-banner-bar{position:relative;height:4px;background:rgba(201,168,76,0.12);border-radius:2px;overflow:hidden;margin-bottom:9px}
+.dna-banner-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gl));border-radius:2px;transition:width 0.5s cubic-bezier(.4,0,.2,1)}
+.dna-banner-hint{position:relative;font-size:0.64rem;color:var(--dim);line-height:1.55}
+.dna-chips{display:flex;flex-wrap:wrap;gap:6px}
+.dna-chip{font-size:0.72rem;padding:6px 11px;background:var(--surface);border:1px solid var(--border2);color:var(--text2);border-radius:20px;cursor:pointer;transition:all 0.18s;user-select:none}
+.dna-chip:hover{border-color:rgba(201,168,76,0.4);color:var(--text)}
+.dna-chip.on{background:rgba(201,168,76,0.16);border-color:var(--gold);color:var(--gold);font-weight:500}
+.dna-single{display:flex;flex-wrap:wrap;gap:6px}
+.dna-opt{flex:1;min-width:calc(33% - 6px);text-align:center;font-size:0.7rem;padding:9px 6px;background:var(--surface);border:1px solid var(--border2);color:var(--text2);border-radius:4px;cursor:pointer;transition:all 0.18s;user-select:none}
+.dna-opt:hover{border-color:rgba(201,168,76,0.4);color:var(--text)}
+.dna-opt.on{background:rgba(201,168,76,0.16);border-color:var(--gold);color:var(--gold);font-weight:500}
+.dna-cat{font-family:'Playfair Display',serif;font-size:0.78rem;color:var(--gold);margin-bottom:10px;letter-spacing:0.5px;border-bottom:1px solid var(--border2);padding-bottom:6px}
+.dna-hint{color:var(--dim);text-transform:none;letter-spacing:0;font-weight:400}
+.dna-input{width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:'Inter',sans-serif;font-size:0.8rem;padding:9px 11px;outline:none;border-radius:2px;transition:border-color 0.2s}
+.dna-input:focus{border-color:rgba(201,168,76,0.45)}
+.dna-input::placeholder{color:var(--dim);opacity:0.6}
+.dna-chip.db.on{background:rgba(224,96,80,0.14);border-color:#e06050;color:#e06050}
+.archetype-card{position:relative;background:linear-gradient(135deg,rgba(240,168,90,0.16),rgba(244,132,95,0.05));border:1px solid rgba(240,168,90,0.4);border-radius:16px;padding:18px 16px;text-align:center;overflow:hidden}
+.archetype-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(201,168,76,0.18),transparent 60%);pointer-events:none}
+.arch-emoji{font-size:2.4rem;line-height:1;margin-bottom:8px;position:relative}
+.arch-name{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--gold);font-weight:700;margin-bottom:5px;position:relative}
+.arch-desc{font-size:0.7rem;color:var(--text2);line-height:1.6;position:relative}
+.arch-traits{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:10px;position:relative}
+.arch-trait{font-size:0.58rem;letter-spacing:0.5px;text-transform:uppercase;padding:3px 9px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);color:var(--gold);border-radius:12px}
+.dna-memory{margin-top:14px;padding:14px;background:var(--surface);border:1px solid var(--border2);border-radius:6px}
+.dna-learn-row{display:flex;align-items:flex-start;gap:8px;font-size:0.72rem;color:var(--text2);line-height:1.5;padding:5px 0;border-bottom:1px solid rgba(201,168,76,0.06)}
+.dna-learn-row:last-child{border-bottom:none}
+.dna-learn-row .lk{flex-shrink:0;font-size:0.8rem}
+.edit-field{margin-bottom:11px}
+.edit-field label{display:block;font-size:0.6rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--dim);margin-bottom:5px}
+.edit-field input,.edit-field textarea,.edit-field select{width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:'Inter',sans-serif;font-size:0.8rem;padding:8px 11px;outline:none;border-radius:2px;transition:border-color 0.2s}
+.edit-field input:focus,.edit-field textarea:focus,.edit-field select:focus{border-color:rgba(201,168,76,0.45)}
+.edit-field select{cursor:pointer;appearance:none;padding-right:28px}
+.edit-field textarea{resize:vertical;min-height:64px;line-height:1.6}
+.edit-field select option{background:var(--bg2)}
+.help-topic{border-bottom:1px solid var(--border2)}
+.help-topic:last-child{border-bottom:none}
+.help-q{display:flex;justify-content:space-between;align-items:center;padding:11px 0;font-size:0.78rem;color:var(--text);cursor:pointer;gap:8px;user-select:none;line-height:1.4}
+.help-q:hover{color:var(--gold)}
+.help-arrow{color:var(--gold);font-size:0.8rem;flex-shrink:0;transition:transform 0.2s}
+.help-arrow.open{transform:rotate(180deg)}
+.help-a{display:none;font-size:0.73rem;color:var(--dim);line-height:1.85;padding-bottom:13px}
+.help-a.open{display:block}
+#pp-avatar-display:hover #av-hover{opacity:1!important}
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:280}
+#ov.show{display:block}
+#main{margin-left:var(--sb-w);transition:margin-left 0.3s cubic-bezier(.4,0,.2,1)}
+#main.shifted{margin-left:calc(var(--sb-w) + 310px)}
+nav{position:fixed;top:0;left:var(--sb-w);right:0;z-index:200;padding:14px 36px;display:flex;align-items:center;justify-content:flex-end;background:var(--nav-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);transition:left 0.3s cubic-bezier(.4,0,.2,1),background 0.3s}
+nav.shifted{left:calc(var(--sb-w) + 310px)}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:0.82rem;letter-spacing:0.2px;transition:color 0.3s}
+.nav-links a:hover{color:var(--gold)}
+.nav-cta{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:8px 20px;font-family:'Inter',sans-serif;font-size:0.74rem;letter-spacing:0.3px;cursor:pointer;transition:all 0.3s;border-radius:30px}
+.nav-cta:hover{background:var(--gold);color:#2a1810}
+@media(max-width:768px){.nav-links a{display:none}}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding-top:80px}
+.hbg{position:absolute;inset:0;background:linear-gradient(135deg,var(--bg) 0%,var(--bg2) 35%,var(--bg3) 65%,var(--bg) 100%);transition:background 0.3s}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);animation:drift 22s ease-in-out infinite;pointer-events:none}
+.orb1{width:520px;height:520px;background:radial-gradient(circle,rgba(244,132,95,0.22),rgba(240,168,90,0.08));top:-15%;left:-10%}
+.orb2{width:380px;height:380px;background:radial-gradient(circle,rgba(63,182,196,0.22),rgba(127,181,216,0.1));bottom:5%;right:0%;animation-delay:-5s}
+.orb3{width:300px;height:300px;background:radial-gradient(circle,rgba(255,201,122,0.18),rgba(244,155,138,0.07));top:45%;left:55%;animation-delay:-9s}
+@keyframes drift{0%,100%{transform:translate(0,0)}33%{transform:translate(25px,-18px)}66%{transform:translate(-12px,22px)}}
+.hcontent{position:relative;z-index:1;text-align:center;padding:0 20px;max-width:860px}
+.hbadge{display:inline-flex;align-items:center;gap:8px;background:rgba(224,182,88,0.1);border:1px solid rgba(224,182,88,0.18);border-radius:30px;padding:7px 20px;font-size:0.72rem;letter-spacing:0.3px;color:var(--gold);margin-bottom:24px;font-weight:500}
+.hbadge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold);animation:blink 2s infinite}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,7vw,5rem);line-height:1.08;margin-bottom:16px}
+.hero h1 em{font-style:italic;color:var(--gold)}
+.hero-sub{font-size:0.95rem;color:var(--text2);line-height:1.9;max-width:540px;margin:0 auto 32px;font-weight:300}
+.sw{max-width:740px;margin:0 auto}
+.sc{background:var(--surface);backdrop-filter:blur(20px);border:1px solid var(--border);display:flex;align-items:center;transition:border-color 0.3s,box-shadow 0.3s;margin-bottom:14px;border-radius:var(--rl);box-shadow:0 8px 30px rgba(0,0,0,0.12)}
+.sc:focus-within{border-color:rgba(224,182,88,0.5);box-shadow:0 8px 36px rgba(224,182,88,0.15)}
+.sc input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'Inter',sans-serif;font-size:0.92rem;padding:16px 20px}
+.sc input::placeholder{color:var(--text2);opacity:0.5}
+.sdiv{width:1px;height:26px;background:var(--border);flex-shrink:0}
+.nsel{background:none;border:none;outline:none;color:var(--text);font-family:'Inter',sans-serif;font-size:0.8rem;cursor:text;padding:15px 8px}
+.nsel::placeholder{color:var(--dim);opacity:0.6}
+.nsel::-webkit-inner-spin-button,.nsel::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.nsel[type=number]{-moz-appearance:textfield}
+.sbtn{background:linear-gradient(135deg,var(--gl),var(--gold));color:#2a1810;border:none;padding:16px 30px;font-family:'Inter',sans-serif;font-size:0.82rem;font-weight:600;letter-spacing:0.3px;cursor:pointer;white-space:nowrap;border-radius:0 var(--rl) var(--rl) 0;transition:filter 0.2s}
+.sbtn:hover{filter:brightness(1.06)}
+.sbtn:disabled{opacity:0.6;cursor:not-allowed}
+.derr{color:var(--red);font-size:0.75rem;padding:11px 16px;background:rgba(240,122,106,0.1);border:1px solid rgba(240,122,106,0.28);display:none;margin-bottom:10px;border-radius:var(--rs)}
+.trow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+.tt{background:var(--surface);border:1px solid transparent;color:var(--text2);padding:9px 19px;font-family:'Inter',sans-serif;font-size:0.76rem;letter-spacing:0.2px;cursor:pointer;transition:all 0.3s;border-radius:30px}
+.tt:hover{color:var(--text);transform:translateY(-1px);background:var(--surface2)}
+.tt.active{color:var(--gold);background:rgba(224,182,88,0.14);box-shadow:0 4px 14px rgba(224,182,88,0.12)}
+.htags{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.htag{font-size:0.7rem;color:var(--gold);letter-spacing:0.2px;cursor:pointer;transition:all 0.3s;opacity:0.75}
+.htag:hover{color:var(--gold);opacity:1}
+.htag::before{content:'\2197 '}
+#rs{display:none;padding:48px 40px;max-width:1240px;margin:0 auto}
+@media(max-width:900px){#rs{padding:32px 16px}}
+.rh{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:14px;border-bottom:1px solid var(--border);padding-bottom:24px}
+.rh h2{font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--text)}
+.rh h2 span{color:var(--gold)}
+.rh p{color:var(--dim);font-size:0.78rem;margin-top:5px}
+.talert{background:linear-gradient(135deg,rgba(224,182,88,0.08),rgba(244,147,111,0.05));border:1px solid rgba(224,182,88,0.22);padding:12px 18px;font-size:0.78rem;color:var(--text2);margin-bottom:20px;display:none;align-items:center;gap:10px;border-radius:var(--rs)}
+.talert.show{display:flex}
+.mtabs{display:flex;border-bottom:1px solid var(--border)}
+.mtab{padding:13px 22px;font-family:'Inter',sans-serif;font-size:0.8rem;letter-spacing:0.2px;color:var(--dim);cursor:pointer;transition:all 0.25s;border:none;border-bottom:2px solid transparent;background:none}
+.mtab:hover{color:var(--text)}
+.mtab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:24px}
+@media(max-width:800px){.rg{grid-template-columns:1fr}}
+.ip{background:var(--surface2);border:1px solid var(--border);border-radius:26px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,0.1)}
+.phd{padding:16px 22px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between}
+.phl{display:flex;align-items:center;gap:8px}
+.phd h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--text)}
+.gdot{width:5px;height:5px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.pbadge{font-size:0.66rem;letter-spacing:0.2px;padding:5px 13px;border:none;color:var(--gold);background:rgba(224,182,88,0.1);border-radius:20px;font-weight:500}
+.dtabs-wrap{display:flex;align-items:center;border-bottom:1px solid var(--border2);position:relative}
+.dtabs{display:flex;padding:12px 6px;gap:5px;overflow-x:auto;scrollbar-width:none;scroll-behavior:smooth;flex:1}
+.dtabs::-webkit-scrollbar{display:none}
+.dtab{padding:6px 15px;border:1px solid transparent;font-size:0.72rem;letter-spacing:0.2px;color:var(--dim);cursor:pointer;transition:all 0.25s;white-space:nowrap;background:var(--surface2);flex-shrink:0;border-radius:20px}
+.dtab.active,.dtab:hover{color:var(--gold);background:rgba(224,182,88,0.12)}
+.dtab-arrow{flex-shrink:0;width:28px;height:28px;margin:0 6px;border:1px solid var(--border);background:var(--surface);color:var(--gold);font-size:1.1rem;line-height:1;cursor:pointer;border-radius:50%;display:none;align-items:center;justify-content:center;transition:all 0.2s;padding:0}
+.dtab-arrow.show{display:flex}
+.ib{padding:22px;max-height:640px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(201,168,76,0.2) transparent}
+.tb{display:flex;gap:12px;margin-bottom:26px}
+.tlbl{font-size:0.66rem;color:var(--gold);letter-spacing:0.2px;min-width:78px;padding-top:3px;flex-shrink:0;line-height:1.6;opacity:0.85;font-weight:500}
+.tc{flex:1;border-left:1px solid var(--border);padding-left:14px}
+.tc h4{color:var(--text);font-size:0.88rem;margin-bottom:5px;font-weight:600}
+.tc p{color:var(--dim);font-size:0.79rem;line-height:1.78}
+.pn{color:var(--gl);font-style:italic}
+.ttag{display:inline-block;font-size:0.66rem;letter-spacing:0.2px;color:var(--gold);border:none;background:rgba(224,182,88,0.1);padding:3px 11px;margin-top:8px;border-radius:14px}
+.bls{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.bl{font-size:0.66rem;color:rgba(201,168,76,0.7);border:1px solid rgba(201,168,76,0.2);padding:2px 8px;cursor:pointer;transition:all 0.2s;text-decoration:none}
+.bl:hover{border-color:var(--gold);color:var(--gold)}
+.hcol h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.tnote{font-size:0.72rem;color:var(--gold);letter-spacing:0.2px;margin-bottom:14px;opacity:0.8}
+.hstack{display:flex;flex-direction:column;gap:10px}
+.hcard{border:1px solid var(--card-border);cursor:pointer;transition:all 0.3s cubic-bezier(.4,0,.2,1);overflow:hidden;background:var(--card-bg);border-radius:18px;box-shadow:0 4px 16px rgba(0,0,0,0.08)}
+.hcard:hover{border-color:rgba(240,168,90,0.32);transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,0.14)}
+.hcard.expanded{border-color:rgba(240,168,90,0.45)}
+.hct{display:flex;gap:12px;padding:14px 16px;align-items:flex-start}
+.hci{flex:1;min-width:0}
+.hn{font-family:'Playfair Display',serif;font-size:0.88rem;color:var(--text);margin-bottom:2px}
+.hl{font-size:0.68rem;color:var(--dim);margin-bottom:3px}
+.hst{color:var(--gold);font-size:0.62rem;letter-spacing:2px}
+.hpr{text-align:right;flex-shrink:0}
+.hpr .amt{font-size:0.96rem;color:var(--gold);font-weight:600}
+.hpr .per{font-size:0.62rem;color:var(--dim)}
+.htgs{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 12px}
+.htg{font-size:0.64rem;letter-spacing:0.2px;padding:4px 11px;background:rgba(224,182,88,0.08);border:none;color:var(--dim);border-radius:14px}
+.hexp{display:none;border-top:1px solid var(--border2)}
+.hcard.expanded .hexp{display:block}
+.heiph{width:100%;height:190px;display:flex;align-items:center;justify-content:center;font-size:3rem;color:rgba(201,168,76,0.15)}
+.heb{padding:14px 16px}
+.heb p{color:var(--dim);font-size:0.79rem;line-height:1.75;margin-bottom:12px}
+.hed{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.hd label{color:var(--dim);display:block;font-size:0.61rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.hd span{color:var(--text);font-size:0.78rem}
+.hfit{grid-column:1/-1;font-size:0.73rem;color:rgba(201,168,76,0.65);font-style:italic;padding:8px 0;border-top:1px solid var(--border2);margin-top:2px}
+.hbr{display:flex;gap:8px}
+.bbtn{flex:1;padding:13px;background:linear-gradient(135deg,var(--gl),var(--gold));color:#2a1810;border:none;font-family:'Inter',sans-serif;font-size:0.76rem;font-weight:600;letter-spacing:0.3px;cursor:pointer;border-radius:var(--rs);transition:filter 0.2s}
+.bbtn:hover{filter:brightness(1.06)}
+.bbtn2{padding:13px 16px;background:transparent;border:1px solid rgba(224,182,88,0.3);color:var(--gold);font-family:'Inter',sans-serif;font-size:0.76rem;letter-spacing:0.3px;cursor:pointer;white-space:nowrap;border-radius:var(--rs)}
+.bbtn2:hover{border-color:var(--gold);background:rgba(224,182,88,0.07)}
+.lw{padding:36px 22px;text-align:center}
+.lb{height:1px;background:var(--border2);overflow:hidden;margin:14px 0}
+.lf{height:100%;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:ls 1.4s ease-in-out infinite}
+@keyframes ls{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+.lw p{color:var(--dim);font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase}
+.cpanel{background:var(--surface2);border:1px solid var(--border);padding:30px;margin-top:24px;border-radius:20px;box-shadow:0 6px 24px rgba(0,0,0,0.1)}
+.livebadge{font-size:0.66rem;letter-spacing:0.2px;padding:4px 12px;background:rgba(95,212,148,0.14);border:none;color:var(--green);border-radius:20px;font-weight:500}
+.ng{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+@media(max-width:600px){.ng{grid-template-columns:1fr 1fr}}
+.nc{background:var(--surface);border:1px solid var(--border2);padding:14px;cursor:pointer;border-radius:var(--rs);transition:all 0.2s}
+.nc:hover{border-color:rgba(224,182,88,0.35);transform:translateY(-1px)}
+.nct{font-size:0.66rem;color:var(--gold);letter-spacing:0.2px;margin-bottom:4px;opacity:0.85;font-weight:500}
+.ncn{font-size:0.82rem;color:var(--text);margin-bottom:3px;font-family:'Playfair Display',serif}
+.ncd{font-size:0.68rem;color:var(--dim)}
+.ci::placeholder{color:rgba(157,147,181,0.6)}
+.csend{background:linear-gradient(135deg,var(--gl),var(--gold));border:none;padding:11px 20px;font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;letter-spacing:0.3px;color:#2a1810;border-radius:var(--rs)}
+.ci{flex:1;background:var(--surface);border:1px solid var(--border);padding:11px 15px;color:var(--text);font-family:'Inter',sans-serif;font-size:0.84rem;outline:none;border-radius:var(--rs)}
+.ptag{font-size:0.68rem;padding:6px 14px;background:rgba(224,182,88,0.07);border:1px solid rgba(224,182,88,0.22);color:var(--text2);letter-spacing:0.5px;cursor:pointer;transition:all 0.2s;border-radius:20px}
+.ptag:hover{transform:translateY(-1px)}
+.ptag.selected{border-color:var(--gold);color:var(--gold);background:rgba(224,182,88,0.14)}
+.ptag.negative.selected{border-color:var(--red);color:var(--red);background:rgba(240,122,106,0.12)}
+.sbtn2{background:transparent;border:1px solid rgba(201,168,76,0.3);color:var(--gold);padding:9px 20px;font-family:'Inter',sans-serif;font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer}
+.sbtn2:hover{background:rgba(201,168,76,0.08);border-color:var(--gold)}
+.starb{background:none;border:none;color:rgba(201,168,76,0.3);font-size:1.1rem;cursor:pointer;padding:0 2px}
+.starb.lit{color:var(--gold)}
+/* REVIEW ENHANCEMENTS */
+.rv-section{background:var(--surface);border:1px solid var(--border2);border-radius:18px;padding:22px;margin-bottom:16px;transition:all 0.3s}
+.rv-section:hover{border-color:rgba(240,168,90,0.25)}
+.rv-label{font-size:0.7rem;letter-spacing:0.3px;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:6px;font-weight:500}
+.rv-sublabel{font-size:0.72rem;color:var(--dim);margin-bottom:10px;line-height:1.6}
+.rv-textarea{width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:'Inter',sans-serif;font-size:0.82rem;padding:13px 15px;outline:none;border-radius:var(--rs);resize:vertical;min-height:80px;line-height:1.7;transition:border-color 0.2s}
+.rv-textarea:focus{border-color:rgba(224,182,88,0.45)}
+.rv-textarea::placeholder{color:var(--dim);opacity:0.5}
+.rv-divider{height:1px;background:var(--border2);margin:20px 0}
+.rv-insight{background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:6px;padding:14px;margin-top:16px;display:none}
+.rv-insight-title{font-family:'Playfair Display',serif;font-size:0.9rem;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.rv-insight-item{font-size:0.74rem;color:var(--text2);line-height:1.65;padding:4px 0;display:flex;align-items:flex-start;gap:8px}
+.rv-insight-item .ico{flex-shrink:0;font-size:0.85rem}
+.rv-step{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.rv-step-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,rgba(224,182,88,0.2),rgba(244,147,111,0.15));border:1px solid rgba(224,182,88,0.35);display:flex;align-items:center;justify-content:center;font-size:0.72rem;color:var(--gold);font-weight:600;flex-shrink:0}
+.rv-step-text{font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--text)}
+.feats{padding:100px 40px 90px;background:linear-gradient(to bottom,var(--bg),var(--bg2));transition:background 0.3s;position:relative}
+.ey{font-size:0.72rem;letter-spacing:1px;color:var(--gold);text-align:center;margin-bottom:14px;font-weight:500;opacity:0.9}
+.st{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.7rem);text-align:center;color:var(--text);margin-bottom:54px;font-weight:600;letter-spacing:-0.5px}
+.fg{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1100px;margin:0 auto}
+@media(max-width:700px){.fg{grid-template-columns:1fr}}
+.fi{padding:38px 32px;border:1px solid transparent;background:var(--surface2);transition:all 0.4s cubic-bezier(.4,0,.2,1);position:relative;border-radius:20px}
+.fi:hover{background:var(--surface);transform:translateY(-4px);box-shadow:0 16px 44px rgba(0,0,0,0.1)}
+.fi svg{color:var(--gold);opacity:0.85}
+.fi:hover svg{opacity:1}
+.fn{font-family:'Playfair Display',serif;font-size:2.8rem;color:rgba(201,168,76,0.06);position:absolute;top:14px;right:18px}
+.fi svg{width:32px;height:32px;color:var(--gold);margin-bottom:16px}
+.fi h3{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--text);margin-bottom:9px}
+.fi p{color:var(--dim);font-size:0.8rem;line-height:1.8}
+.ftag{font-size:0.64rem;letter-spacing:0.2px;color:var(--green);border:none;padding:4px 11px;margin-top:12px;display:inline-block;border-radius:14px;background:rgba(95,212,148,0.1)}
+.dests{padding:90px 40px 100px;background:var(--bg2);transition:background 0.3s;position:relative}
+.dg{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:auto auto;gap:14px;max-width:1100px;margin:0 auto}
+.dc{position:relative;overflow:hidden;cursor:pointer;border-radius:20px;box-shadow:0 8px 28px rgba(0,0,0,0.2)}
+.dc:first-child{grid-row:1/3;border-radius:24px}
+.dcb{width:100%;min-height:200px;display:flex;align-items:center;justify-content:center;transition:transform 0.6s;position:relative}
+.dc:first-child .dcb{min-height:420px}
+.dc:hover .dcb{transform:scale(1.06)}
+.dc::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(10,14,26,0.88) 0%,transparent 55%)}
+.di{position:absolute;bottom:0;left:0;right:0;padding:20px;z-index:1}
+.dn{font-family:'Playfair Display',serif;font-size:1.15rem;color:white;margin-bottom:3px}
+.dc:first-child .dn{font-size:1.6rem}
+.ds{font-size:0.65rem;color:rgba(255,255,255,0.52);letter-spacing:1px;text-transform:uppercase}
+.de{font-size:55px;opacity:0.12;position:absolute}
+.dc:first-child .de{font-size:90px}
+footer{padding:48px 40px 40px;border-top:1px solid var(--border);display:flex;background:linear-gradient(to bottom,var(--bg2),var(--bg));transition:background 0.3s;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;position:relative}
+.fl{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold);letter-spacing:3px}
+footer p{color:var(--dim);font-size:0.72rem}
+/* WELCOME BACK OVERLAY */
+#wb-ov{display:none;position:fixed;inset:0;background:rgba(6,10,22,0.82);backdrop-filter:blur(14px);z-index:600;align-items:center;justify-content:center;animation:wbFadeIn 0.3s ease}
+@keyframes wbFadeIn{from{opacity:0}to{opacity:1}}
+.wb-card{background:linear-gradient(145deg,var(--bg2),var(--bg));border:1px solid rgba(201,168,76,0.3);border-radius:16px;padding:44px 36px 36px;max-width:480px;width:90%;text-align:center;position:relative;overflow:hidden;transform:translateY(20px);animation:wbSlide 0.4s 0.1s ease forwards;opacity:0}
+@keyframes wbSlide{to{transform:translateY(0);opacity:1}}
+.wb-card::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(201,168,76,0.2),transparent 65%);filter:blur(30px);pointer-events:none}
+.wb-emoji{font-size:3.5rem;margin-bottom:14px;animation:wbBounce 0.6s 0.4s ease both}
+@keyframes wbBounce{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+.wb-title{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--text);margin-bottom:8px;line-height:1.3}
+.wb-title span{color:var(--gold)}
+.wb-sub{font-size:0.88rem;color:var(--text2);line-height:1.8;margin-bottom:28px;max-width:380px;margin-left:auto;margin-right:auto}
+.wb-cta{display:block;width:100%;padding:15px;background:linear-gradient(135deg,var(--gl),var(--gold));color:#2a1810;border:none;font-family:'Inter',sans-serif;font-size:0.88rem;font-weight:600;letter-spacing:0.3px;cursor:pointer;border-radius:var(--rs);margin-bottom:12px;transition:transform 0.15s}
+.wb-cta:hover{transform:scale(1.02)}
+.wb-skip{display:block;width:100%;padding:12px;background:none;border:1px solid var(--border);color:var(--dim);font-family:'Inter',sans-serif;font-size:0.8rem;cursor:pointer;border-radius:var(--rs);transition:all 0.2s}
+.wb-skip:hover{border-color:rgba(201,168,76,0.3);color:var(--text)}
+.wb-stats{display:flex;gap:12px;justify-content:center;margin-bottom:24px}
+.wb-stat{background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:10px 16px;text-align:center;min-width:80px}
+.wb-stat-n{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);font-weight:600}
+.wb-stat-l{font-size:0.66rem;letter-spacing:0.2px;color:var(--dim);margin-top:2px}
+#ibtn{background:linear-gradient(135deg,var(--gl),var(--gold));color:#2a1810;border:none;font-weight:600;animation:ibPulse 2.5s ease-in-out infinite}
+@keyframes ibPulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.4)}50%{box-shadow:0 0 0 8px rgba(201,168,76,0)}}
+body[data-theme="light"] #wb-ov{background:rgba(240,235,225,0.88)}
+body[data-theme="light"] .wb-card{background:linear-gradient(145deg,#f8f4ec,#faf7f2);border-color:rgba(140,100,40,0.25)}
+/* MAP OVERLAY */
+#map-ov{display:none;position:fixed;inset:0;z-index:550;background:var(--bg);flex-direction:column}
+.map-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.map-title{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--text)}
+.map-title span{color:var(--gold)}
+.map-legend{display:flex;gap:16px;font-size:0.68rem;color:var(--dim);flex-wrap:wrap}
+.map-leg{display:flex;align-items:center;gap:5px}
+.map-dot{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,0.5);flex-shrink:0}
+.map-close{background:none;border:1px solid var(--border);color:var(--dim);padding:7px 16px;font-family:'Inter',sans-serif;font-size:0.72rem;cursor:pointer;border-radius:3px;transition:all 0.2s}
+.map-close:hover{border-color:var(--gold);color:var(--text)}
+#map-status{text-align:center;padding:60px 20px;color:var(--dim);font-size:0.85rem}
+#map-status .lb{max-width:300px;margin:18px auto}
+#map-container{flex:1;min-height:0}
+.map-btn{background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05));border:1px solid rgba(201,168,76,0.35);color:var(--gold);padding:7px 16px;font-family:'Inter',sans-serif;font-size:0.7rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;font-weight:600}
+.map-btn:hover{background:rgba(201,168,76,0.2);border-color:var(--gold)}
+body[data-theme="light"] #map-ov{background:var(--bg)}
+body[data-theme="light"] .map-bar{border-bottom-color:rgba(140,100,40,0.15)}
+.gm-style .gm-style-iw-c{border-radius:8px!important;padding:2px!important}
+.gm-style .gm-style-iw-d{overflow:auto!important;max-height:220px!important}
+.key-box{max-width:420px;margin:0 auto;text-align:center;padding:48px 24px}
+.key-box h3{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text);margin-bottom:8px}
+.key-box p{font-size:0.82rem;color:var(--dim);line-height:1.7;margin-bottom:22px}
+.key-input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'Inter',monospace;font-size:0.82rem;padding:13px 16px;outline:none;border-radius:4px;margin-bottom:12px;transition:border-color 0.2s;letter-spacing:0.5px}
+.key-input:focus{border-color:var(--gold)}
+.key-input::placeholder{color:var(--dim);opacity:0.5;font-family:'Inter',sans-serif;letter-spacing:0}
+.key-go{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),#a8782a);color:#0a0e1a;border:none;font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:4px;margin-bottom:10px}
+.key-go:disabled{opacity:0.5;cursor:not-allowed}
+.key-help{font-size:0.68rem;color:var(--dim);line-height:1.8}
+.key-help a{color:var(--gold);text-decoration:none}
+.key-help a:hover{text-decoration:underline}
+.key-saved{display:inline-flex;align-items:center;gap:6px;font-size:0.7rem;color:#50c878;background:rgba(80,200,120,0.08);border:1px solid rgba(80,200,120,0.2);padding:5px 12px;border-radius:20px;margin-bottom:16px}
+/* ── FRIENDLY FONT OVERRIDES ── */
+body,button,input,textarea,select,.nsel,.sbtn,.tt,.nav-cta,.bbtn,.bbtn2,.csend,.ci,.wb-cta,.wb-skip,.tbtn,.dna-input,.key-input,.key-go,.ptag,.data-action-btn,.actn-btn{font-family:'Nunito Sans',sans-serif!important}
+.sb-logo,.pp-name,.pp-av,.sb-avatar,.hero h1,.st,.rh h2,.phd h3,.hcol h3,.hn,.h-dest,.dna-banner-title,.arch-name,.dna-cat,.ncn,.wb-title,.map-title,.fl,.fi h3,.dn,.rv-step-text,.key-box h3,.cpanel h3{font-family:'Fraunces',serif!important}
+.hero h1{letter-spacing:-1px;font-weight:600}
+.st{font-weight:600;letter-spacing:-0.5px}
+body{font-weight:400;letter-spacing:0.1px}
+.hero-sub{font-weight:400}
+</style>
 </head>
 <body>
-
-  <nav>
-    <div class="logo">Fish<span>Eye</span></div>
-    <a href="#">Get Early Access</a>
-  </nav>
-
+<div id="sidebar">
+  <div class="sb-logo" onclick="toggleSB()"><span>V</span><button class="sb-close" onclick="closeSB(event)">&#10005;</button></div>
+  <button class="sb-btn" onclick="openPanel('profile')"><div class="sb-avatar">JL</div><span class="nav-label">My Profile</span><span class="tip">My Profile</span></button>
+  <div class="sb-divider"></div>
+  <div class="sb-sec">Navigate</div>
+  <button class="sb-btn active" onclick="goHome()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg><span class="nav-label">Plan a Trip</span><span class="tip">Plan a Trip</span></button>
+  <button class="sb-btn" onclick="openPanel('history')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span class="nav-label">Travel History</span><span class="tip">Travel History</span></button>
+  <button class="sb-btn" onclick="openPanel('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg><span class="nav-label">Settings</span><span class="tip">Settings</span></button>
+  <div class="sb-spacer"></div>
+  <div class="sb-divider"></div>
+  <button class="sb-btn sb-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg><span class="nav-label">Sign Out</span><span class="tip">Sign Out</span></button>
+</div>
+<div id="pp"><div class="pp-inner">
+  <div id="pv-profile">
+    <div class="pp-head">
+      <div class="pp-lbl">My Profile</div>
+      <div class="pp-user">
+        <div class="pp-av" id="pp-avatar-display" onclick="triggerAvatarUpload()" style="cursor:pointer;position:relative;overflow:hidden"><span id="pp-initials">?</span><img id="pp-avatar-img" src="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%"><div style="position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;border-radius:50%;font-size:0.6rem;color:#fff" id="av-hover">EDIT</div></div>
+        <input type="file" id="av-file" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
+        <div><div class="pp-name" id="pp-name-display">New Traveller</div><div class="pp-tier"><span class="tdot"></span><span id="pp-tier-display">Explorer</span></div><div class="pp-email" id="pp-email-display">Add your email</div></div>
+      </div>
+      <div class="pp-stats">
+        <div class="pp-stat"><span class="pp-sn" id="stat-trips">0</span><span class="pp-sl">Trips</span></div>
+        <div class="pp-stat"><span class="pp-sn" id="stat-countries">0</span><span class="pp-sl">Countries</span></div>
+        <div class="pp-stat"><span class="pp-sn" id="stat-rating">&mdash;</span><span class="pp-sl">Avg Rating</span></div>
+      </div>
+    </div>
+    <div class="pp-sec" style="padding-top:14px;padding-bottom:14px">
+      <div class="dna-banner" onclick="showView('prefs')">
+        <div class="dna-banner-glow"></div>
+        <div class="dna-banner-content"><div class="dna-banner-icon">&#129516;</div><div style="flex:1;min-width:0"><div class="dna-banner-title">Your Travel DNA</div><div class="dna-banner-sub" id="dna-status">Set up your preferences</div></div><div class="dna-banner-pct" id="dna-pct">0%</div></div>
+        <div class="dna-banner-bar"><div class="dna-banner-fill" id="dna-fill" style="width:0%"></div></div>
+        <div class="dna-banner-hint">The more you tell us &mdash; and the more trips you review &mdash; the smarter every itinerary becomes.</div>
+      </div>
+    </div>
+    <div class="pp-sec"><div class="pp-lbl">Appearance</div><div class="theme-row"><button class="tbtn active" id="t1-dark" onclick="setTheme('dark')">&#127769; Dark</button><button class="tbtn" id="t1-light" onclick="setTheme('light')">&#9728;&#65039; Light</button><button class="tbtn" id="t1-auto" onclick="setTheme('auto')">&#128187; Auto</button></div></div>
+    <div class="pp-sec"><div class="pp-lbl">Quick links</div><div class="pp-flink" onclick="showView('prefs')">&#129516; Travel DNA &amp; Interests</div><div class="pp-flink" onclick="showView('edit')">&#9998; Edit Profile</div><div class="pp-flink" onclick="showView('history')">&#128506; Travel History</div></div>
+    <div class="pp-foot"><div class="pp-flink" onclick="showView('help')">&#10067; Help Centre</div><div class="pp-flink red" onclick="alert('Signed out')">&#8617; Sign Out</div></div>
+  </div>
+  <!-- EDIT -->
+  <div id="pv-edit" style="display:none">
+    <div class="pp-head"><div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><button class="back-btn" onclick="showView('profile')">&larr; Back</button><div class="pp-lbl" style="margin:0">Edit Profile</div></div></div>
+    <div class="pp-sec" style="border:none;flex:1">
+      <div class="edit-field"><label>Full name</label><input id="ef-name" type="text" placeholder="Your full name"></div>
+      <div class="edit-field"><label>Email</label><input id="ef-email" type="email" placeholder="your@email.com"></div>
+      <div class="edit-field"><label>Location</label><input id="ef-location" type="text" placeholder="e.g. Austin, TX"></div>
+      <div class="edit-field"><label>Default travel style</label><select id="ef-style"><option value="solo">Solo</option><option value="friends" selected>Friends</option><option value="family">Family</option><option value="business">Business</option><option value="romantic">Romantic</option></select></div>
+      <div id="edit-msg" style="display:none;font-size:0.72rem;padding:8px 10px;border-radius:3px;margin-top:4px"></div>
+      <button onclick="saveProfile()" style="width:100%;margin-top:16px;padding:11px;background:linear-gradient(135deg,var(--gold),#a8782a);color:#0a0e1a;border:none;font-family:'Inter',sans-serif;font-size:0.76rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer">Save Changes</button>
+      <button onclick="showView('profile')" style="width:100%;margin-top:8px;padding:10px;background:none;border:1px solid var(--border);color:var(--dim);font-family:'Inter',sans-serif;font-size:0.72rem;cursor:pointer">Cancel</button>
+    </div>
+  </div>
+  <!-- DNA -->
+  <div id="pv-prefs" style="display:none">
+    <div class="pp-head">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><button class="back-btn" onclick="showView('profile')">&larr; Back</button><div class="pp-lbl" style="margin:0">&#129516; Your Travel DNA</div></div>
+      <div class="archetype-card"><div class="arch-emoji" id="arch-emoji">&#129516;</div><div class="arch-name" id="arch-name">Undiscovered Traveller</div><div class="arch-desc" id="arch-desc">Answer questions and review trips to reveal your archetype.</div><div class="arch-traits" id="arch-traits"></div></div>
+    </div>
+    <div class="pp-sec">
+      <div class="dna-cat">&#10022; Passions</div>
+      <div class="pp-lbl">What lights you up? <span class="dna-hint">(pick all)</span></div>
+      <div class="dna-chips" id="dna-interests">
+        <span class="dna-chip" data-v="fine dining">&#127869; Fine dining</span><span class="dna-chip" data-v="street food">&#129368; Street food</span><span class="dna-chip" data-v="history">&#127963; History</span><span class="dna-chip" data-v="art and museums">&#127912; Art</span><span class="dna-chip" data-v="nightlife">&#127864; Nightlife</span><span class="dna-chip" data-v="hiking">&#129406; Hiking</span><span class="dna-chip" data-v="beaches">&#127958; Beaches</span><span class="dna-chip" data-v="adventure">&#129674; Adventure</span><span class="dna-chip" data-v="photography">&#128247; Photography</span><span class="dna-chip" data-v="wellness">&#129495; Wellness</span><span class="dna-chip" data-v="wildlife">&#129409; Wildlife</span><span class="dna-chip" data-v="wine and drinks">&#127863; Wine</span><span class="dna-chip" data-v="shopping">&#128717; Shopping</span><span class="dna-chip" data-v="architecture">&#127959; Architecture</span>
+      </div>
+    </div>
+    <div class="pp-sec">
+      <div class="dna-cat">&#10022; Rhythm</div>
+      <div class="pp-lbl">Travel pace</div>
+      <div class="dna-single" id="dna-pace"><span class="dna-opt" data-v="relaxed">&#128034; Relaxed</span><span class="dna-opt" data-v="balanced">&#9878; Balanced</span><span class="dna-opt" data-v="packed">&#9889; Packed</span></div>
+      <div class="pp-lbl" style="margin-top:12px">Budget</div>
+      <div class="dna-single" id="dna-budget"><span class="dna-opt" data-v="budget">&#128184; Budget</span><span class="dna-opt" data-v="mid-range">&#128181; Mid-range</span><span class="dna-opt" data-v="luxury">&#128142; Luxury</span></div>
+      <div class="pp-lbl" style="margin-top:12px">Crowds</div>
+      <div class="dna-single" id="dna-crowds"><span class="dna-opt" data-v="hidden gems">&#129323; Hidden gems</span><span class="dna-opt" data-v="a mix">&#128506; A mix</span><span class="dna-opt" data-v="the classics">&#128248; The classics</span></div>
+    </div>
+    <div class="pp-sec">
+      <div class="dna-cat">&#10022; Deal-breakers <span class="dna-hint">(things you never want)</span></div>
+      <div class="dna-chips" id="dna-dealbreakers">
+        <span class="dna-chip db" data-v="tourist traps">&#128683; Tourist traps</span><span class="dna-chip db" data-v="long queues">&#9203; Long queues</span><span class="dna-chip db" data-v="rushed days">&#127939; Feeling rushed</span><span class="dna-chip db" data-v="big crowds">&#128101; Big crowds</span><span class="dna-chip db" data-v="chain restaurants">&#127828; Chain food</span><span class="dna-chip db" data-v="early starts">&#128564; Early starts</span>
+      </div>
+    </div>
+    <!-- WHAT VOYAGER HAS LEARNED -->
+    <div class="pp-sec" id="dna-memory-sec" style="display:none">
+      <div class="dna-cat">&#129504; What Voyager Has Learned From Your Trips</div>
+      <div class="dna-memory" id="dna-memory"></div>
+      <div style="font-size:0.65rem;color:var(--dim);margin-top:10px;line-height:1.6">This section grows with every trip you review. Voyager uses these insights to personalise future itineraries automatically.</div>
+    </div>
+    <div class="pp-sec" style="border:none">
+      <div id="dna-msg" style="display:none;font-size:0.72rem;padding:8px 10px;border-radius:3px;margin-top:10px;background:rgba(80,200,120,0.1);color:#50c878;border:1px solid rgba(80,200,120,0.25)"></div>
+      <button onclick="saveDNA()" style="width:100%;margin-top:14px;padding:12px;background:linear-gradient(135deg,var(--gold),#a8782a);color:#0a0e1a;border:none;font-family:'Inter',sans-serif;font-size:0.76rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer">Save My Travel DNA</button>
+      <button onclick="showView('profile')" style="width:100%;margin-top:8px;padding:10px;background:none;border:1px solid var(--border);color:var(--dim);font-family:'Inter',sans-serif;font-size:0.72rem;cursor:pointer">Done</button>
+    </div>
+  </div>
+  <!-- HISTORY -->
+  <div id="pv-history" style="display:none"><div class="pp-head"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><button class="back-btn" onclick="showView('profile')">&larr; Back</button><div class="pp-lbl" style="margin:0">Travel History</div></div><div style="font-size:0.73rem;color:var(--dim)" id="history-subtitle">No trips saved yet.</div></div><div class="pp-sec" style="border:none;flex:1" id="history-list-container"></div></div>
+  <!-- SETTINGS -->
+  <div id="pv-settings" style="display:none"><div class="pp-head"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><button class="back-btn" onclick="showView('profile')">&larr; Back</button><div class="pp-lbl" style="margin:0">Settings</div></div></div><div class="pp-sec"><div class="pp-lbl">Appearance</div><div class="theme-row"><button class="tbtn active" id="t2-dark" onclick="setTheme('dark')">&#127769; Dark</button><button class="tbtn" id="t2-light" onclick="setTheme('light')">&#9728;&#65039; Light</button><button class="tbtn" id="t2-auto" onclick="setTheme('auto')">&#128187; Auto</button></div></div><div class="pp-sec"><div class="pp-lbl">Notifications</div><div class="pref-row" onclick="togglePill(this)"><div class="pref-l"><div class="pref-ico">&#128276;</div>Trip reminders</div><div class="pill on"><div class="knob"></div></div></div><div class="pref-row" onclick="togglePill(this)"><div class="pref-l"><div class="pref-ico">&#128176;</div>Price drop alerts</div><div class="pill on"><div class="knob"></div></div></div></div></div>
+  <!-- HELP -->
+  <div id="pv-help" style="display:none"><div class="pp-head"><div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><button class="back-btn" onclick="showView('profile')">&larr; Back</button><div class="pp-lbl" style="margin:0">Help Centre</div></div></div><div class="pp-sec" style="border:none"><div class="help-topic" onclick="toggleHelp('h1')"><div class="help-q">How do I plan a trip?<span class="help-arrow" id="ha-h1">&darr;</span></div><div class="help-a" id="h1">Type any destination, select nights and traveller type, then click Plan My Trip.</div></div><div class="help-topic" onclick="toggleHelp('h2')"><div class="help-q">How does the post-trip review improve my DNA?<span class="help-arrow" id="ha-h2">&darr;</span></div><div class="help-a" id="h2">After each trip, tell Voyager what you loved, what didn't work, and what you'd change. AI analyses your feedback and updates your Travel DNA automatically &mdash; so your next itinerary reflects real experience, not just guesses.</div></div></div></div>
+</div></div>
+<div id="ov" onclick="closePanel()"></div>
+<!-- WELCOME BACK OVERLAY -->
+<div id="wb-ov">
+  <div class="wb-card">
+    <div class="wb-emoji" id="wb-emoji">&#9992;&#65039;</div>
+    <div class="wb-title">Welcome back from <span id="wb-dest">your trip</span>!</div>
+    <div class="wb-sub">You made it! Now help Voyager learn from your experience. What you loved, what fell flat, what you'd do differently &mdash; it all makes your next trip smarter.</div>
+    <div class="wb-stats">
+      <div class="wb-stat"><div class="wb-stat-n" id="wb-nights">-</div><div class="wb-stat-l">Nights</div></div>
+      <div class="wb-stat"><div class="wb-stat-n" id="wb-style">-</div><div class="wb-stat-l">Style</div></div>
+      <div class="wb-stat"><div class="wb-stat-n" id="wb-dna-count">0</div><div class="wb-stat-l">DNA Points</div></div>
+    </div>
+    <button class="wb-cta" onclick="closeWB();goMode('review')">Tell Voyager About My Trip &#129516;</button>
+    <button class="wb-skip" onclick="closeWB()">Still travelling &mdash; not back yet</button>
+  </div>
+</div>
+<!-- MAP OVERLAY -->
+<div id="map-ov">
+  <div class="map-bar">
+    <div><div class="map-title">Trip Map &middot; <span id="map-dest">&mdash;</span></div><div style="font-size:0.65rem;color:var(--dim);margin-top:2px">See how everything fits together</div></div>
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+      <div class="map-legend">
+        <span class="map-leg"><span class="map-dot" style="background:#c9a84c"></span> Hotels</span>
+        <span class="map-leg"><span class="map-dot" style="background:#50c878"></span> Food &amp; Drinks</span>
+        <span class="map-leg"><span class="map-dot" style="background:#6ea8fe"></span> Activities</span>
+      </div>
+      <button class="map-close" onclick="closeMap()">&#10005; Close Map</button>
+    </div>
+  </div>
+  <div id="map-key-panel" style="flex:1;display:none;align-items:center;justify-content:center"></div>
+  <div id="map-status" style="display:none"><p>&#128506; Finding coordinates&hellip;</p><div class="lb"><div class="lf"></div></div></div>
+  <div id="map-container" style="flex:1;display:none"></div>
+</div>
+<!-- API KEY OVERLAY -->
+<div id="apikey-ov" style="display:none;position:fixed;inset:0;z-index:650;background:rgba(8,16,28,0.85);backdrop-filter:blur(12px);align-items:center;justify-content:center">
+  <div class="key-box" style="background:linear-gradient(145deg,var(--bg2),var(--bg));border:1px solid rgba(240,168,90,0.3);border-radius:20px;max-width:460px">
+    <div style="font-size:2.5rem;margin-bottom:14px">&#128273;</div>
+    <h3>Add your Anthropic API key</h3>
+    <p>This file is running outside Claude, so it needs your own key to power trip planning, hotels, the map, and the live companion. Your key stays in your browser only.</p>
+    <input class="key-input" id="apikey-input" type="password" placeholder="sk-ant-..." spellcheck="false" autocomplete="off">
+    <button class="key-go" onclick="saveApiKey()">Save Key &amp; Continue &#8599;</button>
+    <button class="key-go" style="background:none;border:1px solid var(--border);color:var(--dim);margin-top:8px" onclick="closeApiKey()">Cancel</button>
+    <div class="key-help" style="margin-top:16px">
+      <strong style="color:var(--text)">Where to get one:</strong><br>
+      1. Go to <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com</a><br>
+      2. Create an API key &rarr; copy it &rarr; paste above<br>
+      <span style="margin-top:6px;display:inline-block;opacity:0.7">Note: the key is visible in this local file. Only use it on your own machine, and consider deploying with a backend for sharing.</span>
+    </div>
+  </div>
+</div>
+<div id="apikey-done" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:700;background:rgba(95,201,138,0.15);border:1px solid rgba(95,201,138,0.4);color:var(--green);padding:12px 24px;border-radius:30px;font-size:0.82rem;font-weight:600">&#10003; API key saved &mdash; you're all set!</div>
+<div id="main">
+  <nav id="topnav"><div class="nav-links"><a href="#">Destinations</a><a href="#">Hotels</a><button class="nav-cta" id="cbtn" style="display:none" onclick="goMode('companion')">&#128205; I'm Here Now</button><button class="nav-cta" id="ibtn" style="display:none" onclick="welcomeBack()">&#127968; I'm Back!</button><button class="nav-cta" onclick="document.getElementById('apikey-input').value=apiKey();document.getElementById('apikey-ov').style.display='flex'" title="API Key">&#128273;</button></div></nav>
   <section class="hero">
-    <div class="ripple"></div>
-    <div class="ripple"></div>
-    <div class="ripple"></div>
-    <div class="hero-emoji">🎣</div>
-    <h1>Fish smarter,<br/>not <span>harder.</span></h1>
-    <p>Point your phone at any river or lake. FishEye analyzes the water with AI and shows you exactly where to cast.</p>
-    <div class="cta-group">
-      <a href="#" class="btn-primary">Get Early Access</a>
-      <a href="#how" class="btn-secondary">See How It Works</a>
+    <div class="hbg"></div><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+    <div class="hcontent">
+      <div class="hbadge">Adaptive &middot; Honest &middot; Always Learning</div>
+      <h1>The trip planner that<br/><em>adapts to you.</em></h1>
+      <p class="hero-sub">Not just generated &mdash; continuously refined. Voyager builds realistic itineraries, verifies every hotel, and learns from every trip you take.</p>
+      <div class="sw">
+        <div class="sc"><input type="text" id="di" placeholder="Where would you like to go?" onkeydown="if(event.key==='Enter')go()"/><div class="sdiv"></div><input type="number" id="ns" class="nsel" placeholder="nights" min="1" value="" style="width:80px;text-align:center" onkeydown="if(event.key==='Enter')go()"/><div class="sdiv"></div><button class="sbtn" id="sbtn" onclick="go()">Plan My Trip &#8599;</button></div>
+        <div class="derr" id="derr"></div>
+        <div class="trow"><button class="tt" onclick="setT(this,'solo')">&#129523; Solo</button><button class="tt active" onclick="setT(this,'friends')">&#129346; Friends</button><button class="tt" onclick="setT(this,'family')">&#128104;&#8205;&#128105;&#8205;&#128103; Family</button><button class="tt" onclick="setT(this,'business')">&#128188; Business</button><button class="tt" onclick="setT(this,'romantic')">&#128145; Romantic</button></div>
+        <div class="htags"><span class="htag" onclick="qs('Paris, France')">Paris</span><span class="htag" onclick="qs('Tokyo, Japan')">Tokyo</span><span class="htag" onclick="qs('Amalfi Coast, Italy')">Amalfi Coast</span><span class="htag" onclick="qs('Santorini, Greece')">Santorini</span><span class="htag" onclick="qs('New York City')">New York</span><span class="htag" onclick="qs('Bali, Indonesia')">Bali</span></div>
+      </div>
     </div>
   </section>
-
-  <div id="how">
-    <div class="section">
-      <div class="section-label">How It Works</div>
-      <h2>Three steps to your next catch</h2>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <h3>Take a Photo</h3>
-          <p>Open FishEye on your phone and snap a picture of the water in front of you.</p>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <h3>AI Analyzes It</h3>
-          <p>Our AI reads the current, depth, structure, and light to find where fish are hiding.</p>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <h3>Cast with Confidence</h3>
-          <p>See exactly where to cast — marked right on your photo with a written breakdown.</p>
-        </div>
+  <section id="rs">
+    <div class="rh"><div><h2>Your trip to <span id="dlbl">&mdash;</span></h2><p id="rsub"></p></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="map-btn" onclick="openMap()">&#128506;&#65039; View Map</button><button class="nav-cta" onclick="goMode('review')" style="font-size:0.7rem">&#129516; Review &amp; Teach</button><button class="nav-cta" onclick="reset()">&larr; New Search</button></div></div>
+    <div class="talert" id="talert"><span>&#9888;</span><span id="talerttext"></span></div>
+    <div class="mtabs"><button class="mtab active" onclick="goMode('plan')">&#128203; Trip Plan</button><button class="mtab" onclick="goMode('companion')">&#128205; I'm Here Now</button><button class="mtab" onclick="goMode('review')">&#129516; Review &amp; Teach</button></div>
+    <div id="mplan">
+      <div class="rg">
+        <div class="ip"><div class="phd"><div class="phl"><div class="gdot"></div><h3>Your Day-by-Day Plan</h3></div><span class="pbadge">Activities + Real Restaurants</span></div><div class="dtabs-wrap"><button class="dtab-arrow" id="dtab-left" onclick="scrollDays(-1)">&lsaquo;</button><div class="dtabs" id="dtabs"></div><button class="dtab-arrow" id="dtab-right" onclick="scrollDays(1)">&rsaquo;</button></div><div class="ib" id="ib"></div></div>
+        <div class="hcol"><h3><div class="gdot"></div> Verified Hotels</h3><div class="tnote" id="tnote"></div><div class="hstack" id="hstack"></div></div>
       </div>
     </div>
-  </div>
+    <div id="mcompanion" style="display:none">
+      <div class="cpanel"><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><h3 style="font-family:'Playfair Display',serif;font-size:1.1rem">You're in <span id="ccity" style="color:var(--gold)">&mdash;</span> right now.</h3><span class="livebadge">Live</span></div><p style="color:var(--dim);font-size:0.84rem;margin-bottom:20px">Ask anything about your destination.</p><div style="margin-bottom:16px"><div style="font-size:0.78rem;color:var(--gold);letter-spacing:0.2px;margin-bottom:10px;opacity:0.85;font-weight:500">Quick questions</div><div style="display:flex;flex-wrap:wrap;gap:8px" id="qqs"></div></div><div style="margin-bottom:16px"><div style="font-size:0.78rem;color:var(--gold);letter-spacing:0.2px;margin-bottom:10px;opacity:0.85;font-weight:500">Nearby</div><div class="ng" id="nbg"></div></div><div style="display:flex;gap:8px"><input class="ci" id="cq" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')askC()"/><button class="csend" onclick="askC()">Ask &#8599;</button></div><div id="cans" style="display:none;margin-top:14px;background:rgba(201,168,76,0.05);border:1px solid var(--border);padding:14px;font-size:0.82rem;color:var(--dim);line-height:1.75"></div></div>
+    </div>
+    <!-- ═══ ENHANCED POST-TRIP REVIEW ═══ -->
+    <div id="mreview" style="display:none">
+      <div class="cpanel" style="max-width:720px">
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:4px">Teach Voyager about <span id="rdest" style="color:var(--gold)">your trip</span></h3>
+        <p style="color:var(--text2);font-size:0.82rem;margin-bottom:24px;line-height:1.7">Every answer makes your next itinerary smarter. Be honest &mdash; the good <em>and</em> the bad.</p>
 
-  <!-- DEMO SECTION -->
-  <div id="demo">
-    <div class="section" style="max-width:700px">
-      <div class="section-label">Try It Now</div>
-      <h2>See FishEye in action</h2>
-      <div id="demo-box" style="background:rgba(255,255,255,0.04);border:2px dashed rgba(141,184,122,0.4);border-radius:20px;padding:40px 20px;text-align:center;">
-        <div id="upload-prompt">
-          <div style="font-size:3rem;margin-bottom:16px">📸</div>
-          <p style="color:#a89f8c;font-family:Arial,sans-serif;margin-bottom:24px">Upload a photo of a river or lake to try the demo</p>
-          <label for="photo-input" style="background:#8db87a;color:#1a1f14;padding:14px 32px;border-radius:30px;font-family:Arial,sans-serif;font-weight:bold;cursor:pointer;font-size:1rem;">Choose a Photo</label>
-          <input type="file" id="photo-input" accept="image/*" style="display:none"/>
-        </div>
-        <div id="demo-result" style="display:none">
-          <div style="position:relative;display:inline-block;max-width:100%">
-            <img id="preview-img" style="max-width:100%;border-radius:12px;display:block"/>
-            <canvas id="overlay-canvas" style="position:absolute;top:0;left:0;border-radius:12px;pointer-events:none"></canvas>
+        <!-- STEP 1: WHAT YOU LOVED -->
+        <div class="rv-section">
+          <div class="rv-step"><div class="rv-step-num">1</div><div class="rv-step-text">What did you love?</div></div>
+          <div class="rv-sublabel">Pick the highlights and tell us the story.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px" id="review-loved">
+            <span class="ptag" onclick="this.classList.toggle('selected')">&#127860; Amazing food</span>
+            <span class="ptag" onclick="this.classList.toggle('selected')">&#129323; Hidden gems</span>
+            <span class="ptag" onclick="this.classList.toggle('selected')">&#127749; Stunning views</span>
+            <span class="ptag" onclick="this.classList.toggle('selected')">&#127963; Rich history</span>
+            <span class="ptag" onclick="this.classList.toggle('selected')">&#128524; Slow mornings</span>
+            <span class="ptag" onclick="this.classList.toggle('selected')">&#127864; Great nightlife</span>
+            <span class="ptag" onclick="this.classList.toggle('selected')">&#127912; Art &amp; culture</span>
+            <span class="ptag" onclick="this.classList.toggle('selected')">&#128150; Romantic spots</span>
+            <span class="ptag" onclick="this.classList.toggle('selected')">&#129406; Outdoor adventures</span>
+            <span class="ptag" onclick="this.classList.toggle('selected')">&#128176; Great value</span>
+            <span class="ptag" onclick="this.classList.toggle('selected')">&#127958; Beautiful beaches</span>
+            <span class="ptag" onclick="this.classList.toggle('selected')">&#128587; Friendly locals</span>
+            <span class="ptag" onclick="this.classList.toggle('selected')">&#127383; Luxury hotel</span>
           </div>
-          <div id="analysis-box" style="margin-top:24px;text-align:left;background:rgba(141,184,122,0.08);border:1px solid rgba(141,184,122,0.25);border-radius:14px;padding:24px">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-              <span style="font-size:1.4rem">🐟</span>
-              <strong style="color:#8db87a;font-family:Arial,sans-serif">AI Analysis</strong>
-            </div>
-            <div id="analysis-text" style="color:#c8ddb8;font-family:Arial,sans-serif;font-size:0.95rem;line-height:1.8"></div>
-          </div>
-          <button onclick="resetDemo()" style="margin-top:20px;background:transparent;border:1px solid #8db87a;color:#8db87a;padding:12px 28px;border-radius:30px;font-family:Arial,sans-serif;cursor:pointer;font-size:0.95rem;">Try Another Photo</button>
+          <textarea class="rv-textarea" id="rv-loved-text" placeholder="Tell us more &mdash; what was the highlight? A specific restaurant, a sunset walk, the hotel rooftop? The more detail, the better Voyager learns your taste..." rows="3"></textarea>
         </div>
+
+        <!-- STEP 2: WHAT DIDN'T WORK -->
+        <div class="rv-section">
+          <div class="rv-step"><div class="rv-step-num">2</div><div class="rv-step-text">What didn't work?</div></div>
+          <div class="rv-sublabel">No trip is perfect. What would you warn your future self about?</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px" id="review-disliked">
+            <span class="ptag negative" onclick="this.classList.toggle('selected')">&#128683; Tourist traps</span>
+            <span class="ptag negative" onclick="this.classList.toggle('selected')">&#127939; Too rushed</span>
+            <span class="ptag negative" onclick="this.classList.toggle('selected')">&#128148; Bad hotel</span>
+            <span class="ptag negative" onclick="this.classList.toggle('selected')">&#128101; Too crowded</span>
+            <span class="ptag negative" onclick="this.classList.toggle('selected')">&#128169; Generic food</span>
+            <span class="ptag negative" onclick="this.classList.toggle('selected')">&#128564; Too early starts</span>
+            <span class="ptag negative" onclick="this.classList.toggle('selected')">&#128176; Overpriced</span>
+            <span class="ptag negative" onclick="this.classList.toggle('selected')">&#128694; Too much walking</span>
+            <span class="ptag negative" onclick="this.classList.toggle('selected')">&#128532; Boring activities</span>
+            <span class="ptag negative" onclick="this.classList.toggle('selected')">&#127783; Bad weather plan</span>
+          </div>
+          <textarea class="rv-textarea" id="rv-disliked-text" placeholder="What fell flat? A disappointing restaurant, a skip-worthy museum, a hotel that didn't deliver? Voyager will actively avoid these patterns next time..." rows="3"></textarea>
+        </div>
+
+        <!-- STEP 3: WHAT YOU'D CHANGE -->
+        <div class="rv-section">
+          <div class="rv-step"><div class="rv-step-num">3</div><div class="rv-step-text">What would you change?</div></div>
+          <div class="rv-sublabel">If you could do this trip again, what's different?</div>
+          <textarea class="rv-textarea" id="rv-change-text" placeholder="e.g. &quot;I'd spend an extra day in the old town and skip the day trip. I'd pick a hotel closer to the centre. I'd book the sunset cruise on day 1 instead of day 3. More free time for wandering.&quot;" rows="4"></textarea>
+        </div>
+
+        <!-- RATINGS -->
+        <div class="rv-section">
+          <div class="rv-step"><div class="rv-step-num">4</div><div class="rv-step-text">Rate it</div></div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><label style="color:var(--text2);font-size:0.78rem;min-width:110px">Overall trip</label><div id="soall"><button class="starb" onclick="rate('oall',1)">&#9733;</button><button class="starb" onclick="rate('oall',2)">&#9733;</button><button class="starb" onclick="rate('oall',3)">&#9733;</button><button class="starb" onclick="rate('oall',4)">&#9733;</button><button class="starb" onclick="rate('oall',5)">&#9733;</button></div></div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><label style="color:var(--text2);font-size:0.78rem;min-width:110px">Hotel quality</label><div id="shotel"><button class="starb" onclick="rate('hotel',1)">&#9733;</button><button class="starb" onclick="rate('hotel',2)">&#9733;</button><button class="starb" onclick="rate('hotel',3)">&#9733;</button><button class="starb" onclick="rate('hotel',4)">&#9733;</button><button class="starb" onclick="rate('hotel',5)">&#9733;</button></div></div>
+          <div style="display:flex;align-items:center;gap:12px"><label style="color:var(--text2);font-size:0.78rem;min-width:110px">Itinerary pacing</label><div id="space"><button class="starb" onclick="rate('pace',1)">&#9733;</button><button class="starb" onclick="rate('pace',2)">&#9733;</button><button class="starb" onclick="rate('pace',3)">&#9733;</button><button class="starb" onclick="rate('pace',4)">&#9733;</button><button class="starb" onclick="rate('pace',5)">&#9733;</button></div></div>
+        </div>
+
+        <!-- AI INSIGHTS (shown after save) -->
+        <div class="rv-insight" id="rv-insights">
+          <div class="rv-insight-title">&#129504; What Voyager Learned From This Trip</div>
+          <div id="rv-insight-content"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+          <button onclick="saveReview()" style="flex:1;padding:13px;background:linear-gradient(135deg,var(--gold),#a8782a);color:#0a0e1a;border:none;font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;min-width:200px">Save &amp; Teach Voyager &#129516;</button>
+          <button onclick="goMode('plan')" style="padding:13px 20px;background:none;border:1px solid var(--border);color:var(--dim);font-family:'Inter',sans-serif;font-size:0.72rem;cursor:pointer">Back to Plan</button>
+        </div>
+        <div id="psaved" style="display:none;font-size:0.75rem;margin-top:12px;padding:10px;border-radius:4px"></div>
       </div>
     </div>
-  </div>
+  </section>
+  <section class="feats">
+    <div class="ey">Built differently</div>
+    <h2 class="st">Everything other planners <em style="font-family:'Playfair Display',serif;color:var(--gold)">get wrong</em></h2>
+    <div class="fg">
+      <div class="fi"><div class="fn">01</div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><h3>Realistic routing</h3><p>2-3 focused experiences per day with real travel time.</p><span class="ftag">Fixed</span></div>
+      <div class="fi"><div class="fn">02</div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><h3>Live companion</h3><p>Ask what's open, get a rainy-day plan, find what's nearby.</p><span class="ftag">New</span></div>
+      <div class="fi"><div class="fn">03</div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><h3>Learns from every trip</h3><p>Tell Voyager what worked and what didn't. It remembers and adapts.</p><span class="ftag">New</span></div>
+      <div class="fi"><div class="fn">04</div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg><h3>Real booking links</h3><p>Every hotel links directly to Google Hotels and Booking.com.</p><span class="ftag">Fixed</span></div>
+      <div class="fi"><div class="fn">05</div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 6s1-2 5-2 8 4 8 4-1 2-5 2-8-4-8-4zm23 12s-1 2-5 2-8-4-8-4 1-2 5-2 8 4 8 4zM1 18l22-12"/></svg><h3>100% verified hotels</h3><p>Only real, bookable hotels. Never invented names.</p><span class="ftag">Fixed</span></div>
+      <div class="fi"><div class="fn">06</div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><h3>Your DNA, your trip</h3><p>Every trip review refines your DNA. Plans that are truly yours.</p><span class="ftag">New</span></div>
+    </div>
+  </section>
+  <section class="dests">
+    <div class="ey">Popular Right Now</div>
+    <h2 class="st" style="margin-bottom:36px">The world is <em style="font-family:'Playfair Display',serif;color:var(--gold)">waiting</em></h2>
+    <div class="dg">
+      <div class="dc" onclick="qs('Paris, France')"><div class="dcb" style="background:linear-gradient(135deg,#16314a,#3f7a9c,#f0a85a);min-height:420px"><span class="de">&#128508;</span></div><div class="di"><div class="dn">Paris</div><div class="ds">France</div></div></div>
+      <div class="dc" onclick="qs('Tokyo, Japan')"><div class="dcb" style="background:linear-gradient(135deg,#1a3a52,#c4604a,#f49b8a)"><span class="de">&#9961;</span></div><div class="di"><div class="dn">Tokyo</div><div class="ds">Japan</div></div></div>
+      <div class="dc" onclick="qs('Santorini, Greece')"><div class="dcb" style="background:linear-gradient(135deg,#16314a,#2f8f9c,#7fd4d4)"><span class="de">&#127754;</span></div><div class="di"><div class="dn">Santorini</div><div class="ds">Greece</div></div></div>
+      <div class="dc" onclick="qs('Amalfi Coast, Italy')"><div class="dcb" style="background:linear-gradient(135deg,#1f5a52,#5fa86a,#ffc97a)"><span class="de">&#127819;</span></div><div class="di"><div class="dn">Amalfi Coast</div><div class="ds">Italy</div></div></div>
+    </div>
+  </section>
+  <footer><div class="fl">VOYAGER</div><p>&copy; 2026 Voyager &middot; AI-Powered Travel Planning</p></footer>
+</div>
+<script>
+var _ms={};var LS={};
+Object.defineProperties(LS,{getItem:{value:function(k){return _ms.hasOwnProperty(k)?_ms[k]:null},enumerable:false},setItem:{value:function(k,v){_ms[k]=String(v)},enumerable:false},removeItem:{value:function(k){delete _ms[k]},enumerable:false},key:{value:function(i){return Object.keys(_ms)[i]||null},enumerable:false},length:{get:function(){return Object.keys(_ms).length},enumerable:false}});
+var currentTheme='dark',ttype='friends',ctd=null,cdest='',ckey='';
+// ── API KEY (needed when running outside Claude, e.g. downloaded file) ──
+function apiKey(){return LS.getItem('voy_api_key')||''}
+function apiHeaders(){
+  var h={'Content-Type':'application/json'};
+  var k=apiKey();
+  if(k){h['x-api-key']=k;h['anthropic-version']='2023-06-01';h['anthropic-dangerous-direct-browser-access']='true';}
+  return h;
+}
+function maybePromptKey(){
+  if(apiKey())return;
+  document.getElementById('apikey-ov').style.display='flex';
+}
+function saveApiKey(){
+  var k=document.getElementById('apikey-input').value.trim();
+  if(!k){document.getElementById('apikey-input').style.borderColor='#f07a6a';return}
+  LS.setItem('voy_api_key',k);
+  document.getElementById('apikey-ov').style.display='none';
+  var msg=document.getElementById('apikey-done');
+  if(msg){msg.style.display='block';setTimeout(function(){msg.style.display='none'},2500)}
+}
+function closeApiKey(){document.getElementById('apikey-ov').style.display='none'}
+function setTheme(t){currentTheme=t;LS.setItem('voy_theme',t);var b=document.body;if(t==='dark')b.removeAttribute('data-theme');else if(t==='light')b.setAttribute('data-theme','light');else{if(window.matchMedia('(prefers-color-scheme:dark)').matches)b.removeAttribute('data-theme');else b.setAttribute('data-theme','light')}['t1','t2'].forEach(function(p){['dark','light','auto'].forEach(function(k){var el=document.getElementById(p+'-'+k);if(el)el.classList.toggle('active',k===t)})})}
+function toggleSB(){document.getElementById('sidebar').classList.toggle('open')}
+function closeSB(e){e.stopPropagation();document.getElementById('sidebar').classList.remove('open')}
+function goHome(){window.scrollTo({top:0,behavior:'smooth'})}
+function openPanel(v){_switchView(v);document.getElementById('pp').classList.add('open');document.getElementById('ov').classList.add('show');document.getElementById('main').classList.add('shifted');document.getElementById('topnav').classList.add('shifted');document.getElementById('sidebar').classList.remove('open')}
+function closePanel(){document.getElementById('pp').classList.remove('open');document.getElementById('ov').classList.remove('show');document.getElementById('main').classList.remove('shifted');document.getElementById('topnav').classList.remove('shifted')}
+function _switchView(v){['profile','edit','prefs','history','settings','help'].forEach(function(n){var el=document.getElementById('pv-'+n);if(el){el.style.display=n===v?'flex':'none';if(n===v)el.style.flexDirection='column'}});if(v==='history'){renderHistory();refreshStats()}if(v==='prefs')loadDNA()}
+function showView(v){_switchView(v);if(!document.getElementById('pp').classList.contains('open'))openPanel(v)}
+function togglePill(row){row.querySelector('.pill').classList.toggle('on')}
 
-  <script>
-    let imgBase64 = null;
+// ── DNA ──
+var DNA_MULTI=['dna-interests','dna-dealbreakers'];
+var DNA_SINGLE=['dna-pace','dna-budget','dna-crowds'];
+function setupDNAHandlers(){DNA_MULTI.forEach(function(id){var c=document.getElementById(id);if(!c)return;c.querySelectorAll('.dna-chip').forEach(function(ch){ch.onclick=function(){ch.classList.toggle('on')}})});DNA_SINGLE.forEach(function(id){var c=document.getElementById(id);if(!c)return;c.querySelectorAll('.dna-opt').forEach(function(o){o.onclick=function(){c.querySelectorAll('.dna-opt').forEach(function(x){x.classList.remove('on')});o.classList.add('on')}})})}
+function readDNAFromForm(){var ex={};try{ex=JSON.parse(LS.getItem('voy_dna')||'{}')}catch(e){}var dna={loves:ex.loves||[],dislikes:ex.dislikes||[],changes:ex.changes||[],tripInsights:ex.tripInsights||[],tripsLearned:ex.tripsLearned||0};DNA_MULTI.forEach(function(id){var k=id.replace('dna-','');dna[k]=[];var c=document.getElementById(id);if(!c)return;c.querySelectorAll('.dna-chip.on').forEach(function(ch){dna[k].push(ch.getAttribute('data-v'))})});DNA_SINGLE.forEach(function(id){var k=id.replace('dna-','');var c=document.getElementById(id);if(!c){dna[k]='';return}var s=c.querySelector('.dna-opt.on');dna[k]=s?s.getAttribute('data-v'):''});return dna}
+function saveDNA(){var dna=readDNAFromForm();LS.setItem('voy_dna',JSON.stringify(dna));updateDNAProgress();computeArchetype();var m=document.getElementById('dna-msg');m.textContent='\u2713 Saved! Future itineraries now reflect your DNA.';m.style.display='block';setTimeout(function(){m.style.display='none'},3500)}
+function loadDNA(){setupDNAHandlers();try{var dna=JSON.parse(LS.getItem('voy_dna')||'null');if(dna){DNA_MULTI.forEach(function(id){var k=id.replace('dna-','');var vals=dna[k]||[];var c=document.getElementById(id);if(!c)return;c.querySelectorAll('.dna-chip').forEach(function(ch){ch.classList.toggle('on',vals.indexOf(ch.getAttribute('data-v'))>-1)})});DNA_SINGLE.forEach(function(id){var k=id.replace('dna-','');var c=document.getElementById(id);if(!c)return;c.querySelectorAll('.dna-opt').forEach(function(o){o.classList.toggle('on',o.getAttribute('data-v')===dna[k])})})}}catch(e){}computeArchetype();renderLearned()}
+function updateDNAProgress(){try{var dna=JSON.parse(LS.getItem('voy_dna')||'null');var fill=document.getElementById('dna-fill'),pct=document.getElementById('dna-pct'),st=document.getElementById('dna-status');if(!fill)return;if(!dna){fill.style.width='0%';pct.textContent='0%';st.textContent='Set up your preferences';return}var dims=['interests','dealbreakers','pace','budget','crowds'];var filled=0;dims.forEach(function(k){var v=dna[k];if(Array.isArray(v)?v.length:v)filled++});var tripBonus=Math.min((dna.tripsLearned||0)*8,40);var p=Math.min(100,Math.round((filled/dims.length)*60)+tripBonus);fill.style.width=p+'%';pct.textContent=p+'%';if(p===0)st.textContent='Set up your preferences';else if(p<30)st.textContent='Getting to know you\u2026';else if(p<60)st.textContent='Building your profile';else if(p<90)st.textContent='Richly detailed \u2014 '+(dna.tripsLearned||0)+' trip'+(dna.tripsLearned!==1?'s':'')+' learned';else st.textContent='Fully mapped \u2713 '+(dna.tripsLearned||0)+' trips learned'}catch(e){}}
+function computeArchetype(){var dna;try{dna=JSON.parse(LS.getItem('voy_dna')||'null')}catch(e){dna=null}var em=document.getElementById('arch-emoji'),nm=document.getElementById('arch-name'),ds=document.getElementById('arch-desc'),tr=document.getElementById('arch-traits');if(!dna||!(dna.interests&&dna.interests.length)||!dna.pace){em.textContent='\ud83e\uddec';nm.textContent='Undiscovered Traveller';ds.textContent='Answer questions and review trips to reveal your archetype.';tr.innerHTML='';return}var I=(dna.interests||[]).join(' ')+(dna.loves||[]).join(' '),traits=[];var lux=/luxury/.test(dna.budget||''),bud=/budget/.test(dna.budget||''),hid=/hidden/.test(dna.crowds||'');var foodie=/dining|food|wine|restaurant/i.test(I),culture=/history|art|museum|architecture/i.test(I),nature=/hiking|beach|wildlife|outdoor|adventure/i.test(I),night=/nightlife/i.test(I),relax=/wellness|slow|relaxed/i.test(I+(dna.pace||''));var name,emoji,desc;if(foodie&&hid){name='The Flavour Hunter';emoji='\ud83c\udf5c';desc='You chase the meals locals queue for, not the ones in the guidebook.'}else if(nature){name='The Wild Soul';emoji='\ud83c\udfd4\ufe0f';desc='Trails, summits, open water \u2014 you come alive outdoors.'}else if(culture){name='The Storyseeker';emoji='\ud83d\udcd6';desc='You\u2019re drawn to the layers of a place \u2014 its art, its past, its walls.'}else if(lux&&relax){name='The Refined Wanderer';emoji='\ud83e\udd42';desc='Slow, beautiful, effortless. You collect experiences, never rush them.'}else if(night){name='The Midnight Local';emoji='\ud83c\udf19';desc='Your trip starts at sunset. You find the pulse in bars and late-night streets.'}else if(foodie){name='The Gourmand';emoji='\ud83c\udf77';desc='Every destination is a tasting menu. You plan days around tables.'}else if(bud){name='The Resourceful Explorer';emoji='\ud83e\udded';desc='You stretch every dollar into adventure, finding magic others walk past.'}else{name='The Balanced Voyager';emoji='\u2728';desc='A bit of everything, done your way.'}
+  if(lux)traits.push('Luxe');if(bud)traits.push('Savvy');if(hid)traits.push('Off-grid');if(foodie)traits.push('Foodie');if(culture)traits.push('Culture');if(nature)traits.push('Outdoorsy');if(night)traits.push('Night owl');if(relax)traits.push('Easygoing');if((dna.tripsLearned||0)>0)traits.push(dna.tripsLearned+' trips learned');
+  em.textContent=emoji;nm.textContent=name;ds.textContent=desc;tr.innerHTML=traits.slice(0,6).map(function(t){return'<span class="arch-trait">'+t+'</span>'}).join('')}
 
-    document.getElementById('photo-input').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = async function(ev) {
-        imgBase64 = ev.target.result.split(',')[1];
-        const img = document.getElementById('preview-img');
-        img.src = ev.target.result;
-        img.onload = async function() {
-          document.getElementById('upload-prompt').style.display = 'none';
-          document.getElementById('demo-result').style.display = 'block';
-          document.getElementById('analysis-box').innerHTML = `<div style="text-align:center;padding:20px;color:#8db87a;font-family:Arial,sans-serif">🔍 Analyzing your water... hang tight!</div>`;
+function renderLearned(){var box=document.getElementById('dna-memory'),sec=document.getElementById('dna-memory-sec');if(!box||!sec)return;var dna;try{dna=JSON.parse(LS.getItem('voy_dna')||'null')}catch(e){dna=null}var loves=(dna&&dna.loves)||[],dis=(dna&&dna.dislikes)||[],changes=(dna&&dna.changes)||[],insights=(dna&&dna.tripInsights)||[];if(!loves.length&&!dis.length&&!changes.length&&!insights.length){sec.style.display='none';return}sec.style.display='block';var html='';
+  if(loves.length)html+='<div style="margin-bottom:10px"><div style="font-size:0.62rem;letter-spacing:1.5px;text-transform:uppercase;color:#50c878;margin-bottom:6px">&#9829; Things you love</div>'+loves.map(function(l){return'<div class="dna-learn-row"><span class="lk">&#9829;</span><span>'+l+'</span></div>'}).join('')+'</div>';
+  if(dis.length)html+='<div style="margin-bottom:10px"><div style="font-size:0.62rem;letter-spacing:1.5px;text-transform:uppercase;color:#e06050;margin-bottom:6px">&#10005; Things to avoid</div>'+dis.map(function(d){return'<div class="dna-learn-row"><span class="lk" style="color:#e06050">&#10005;</span><span>'+d+'</span></div>'}).join('')+'</div>';
+  if(changes.length)html+='<div style="margin-bottom:10px"><div style="font-size:0.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px">&#128161; Things to do differently</div>'+changes.map(function(c){return'<div class="dna-learn-row"><span class="lk" style="color:var(--gold)">&#128161;</span><span>'+c+'</span></div>'}).join('')+'</div>';
+  if(insights.length)html+='<div><div style="font-size:0.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px">&#129504; AI insights from your trips</div>'+insights.map(function(i){return'<div class="dna-learn-row"><span class="lk" style="color:var(--gold)">&#10148;</span><span>'+i+'</span></div>'}).join('')+'</div>';
+  box.innerHTML=html}
 
-          try {
-            const resp = await fetch('https://api.anthropic.com/v1/messages', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                model: 'claude-sonnet-4-6',
-                max_tokens: 1000,
-                messages: [{
-                  role: 'user',
-                  content: [
-                    {
-                      type: 'image',
-                      source: { type: 'base64', media_type: 'image/jpeg', data: imgBase64 }
-                    },
-                    {
-                      type: 'text',
-                      text: `You are an expert freshwater fishing guide analyzing a photo of a river or lake. 
-Look at this image carefully and identify 1-3 specific spots where fish are most likely to be.
+function buildDNAPromptText(){try{var dna=JSON.parse(LS.getItem('voy_dna')||'null');if(!dna)return '';var p=[];if(dna.interests&&dna.interests.length)p.push('Loves: '+dna.interests.join(', '));if(dna.pace)p.push('Pace: '+dna.pace);if(dna.budget)p.push('Budget: '+dna.budget);if(dna.crowds)p.push('Crowds: '+dna.crowds);if(dna.dealbreakers&&dna.dealbreakers.length)p.push('AVOID: '+dna.dealbreakers.join(', '));if(dna.loves&&dna.loves.length)p.push('From past trips, loved: '+dna.loves.join('; '));if(dna.dislikes&&dna.dislikes.length)p.push('From past trips, AVOID: '+dna.dislikes.join('; '));if(dna.changes&&dna.changes.length)p.push('Lessons learned: '+dna.changes.join('; '));if(dna.tripInsights&&dna.tripInsights.length)p.push('AI-learned preferences: '+dna.tripInsights.join('; '));return p.length?'\n\nTraveller profile (honour every preference):\n'+p.join('\n'):'';}catch(e){return ''}}
 
-Respond ONLY with a valid JSON object in this exact format, no other text:
-{
-  "isWater": true,
-  "spots": [
-    { "x": 0.3, "y": 0.6, "label": "A", "name": "Spot Name", "reason": "One sentence why fish would be here." },
-    { "x": 0.7, "y": 0.4, "label": "B", "name": "Spot Name", "reason": "One sentence why fish would be here." }
-  ],
-  "overall": "2-3 sentence overall assessment of this fishing location.",
-  "rating": "Good" 
+// ── AVATAR & PROFILE ──
+function triggerAvatarUpload(){document.getElementById('av-file').click()}
+function handleAvatarUpload(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){LS.setItem('voy_avatar',e.target.result);var img=document.getElementById('pp-avatar-img');if(img){img.src=e.target.result;img.style.display='block'}document.getElementById('pp-initials').style.display='none'};r.readAsDataURL(f)}
+function saveProfile(){var n=document.getElementById('ef-name').value.trim(),em=document.getElementById('ef-email').value.trim();if(!n){showEditMsg('Name is required','error');return}var d={name:n,email:em,location:document.getElementById('ef-location').value.trim(),style:document.getElementById('ef-style').value};LS.setItem('voy_profile',JSON.stringify(d));var ini=n.split(/\s+/).map(function(p){return p[0]||''}).join('').substring(0,2).toUpperCase()||'?';document.getElementById('pp-initials').textContent=ini;document.getElementById('pp-name-display').textContent=n;document.getElementById('pp-email-display').textContent=em||'No email';refreshStats();showEditMsg('Saved \u2713','success');setTimeout(function(){showView('profile')},1e3)}
+function showEditMsg(m,t){var el=document.getElementById('edit-msg');el.textContent=m;el.style.display='block';el.style.background=t==='success'?'rgba(80,200,120,0.1)':'rgba(224,96,80,0.1)';el.style.color=t==='success'?'#50c878':'#e06050';el.style.border='1px solid '+(t==='success'?'rgba(80,200,120,0.3)':'rgba(224,96,80,0.3)')}
+function loadProfile(){try{var d=JSON.parse(LS.getItem('voy_profile')||'null');if(d){if(d.name){document.getElementById('ef-name').value=d.name;document.getElementById('pp-name-display').textContent=d.name;document.getElementById('pp-initials').textContent=d.name.split(/\s+/).map(function(p){return p[0]||''}).join('').substring(0,2).toUpperCase()||'?'}if(d.email){document.getElementById('ef-email').value=d.email;document.getElementById('pp-email-display').textContent=d.email}if(d.location)document.getElementById('ef-location').value=d.location;if(d.style)document.getElementById('ef-style').value=d.style}}catch(e){}}
+function toggleHelp(id){var b=document.getElementById(id),a=document.getElementById('ha-'+id);if(b)b.classList.toggle('open');if(a)a.classList.toggle('open')}
+function initApp(){loadProfile();refreshStats();renderHistory();updateDNAProgress();var av=LS.getItem('voy_avatar');if(av){var img=document.getElementById('pp-avatar-img');if(img){img.src=av;img.style.display='block'}document.getElementById('pp-initials').style.display='none'}setTheme(LS.getItem('voy_theme')||'dark')}
+
+// ── TRIP ENGINE ──
+function setT(el,t){ttype=t;document.querySelectorAll('.tt').forEach(function(b){b.classList.remove('active')});el.classList.add('active')}
+function qs(d){document.getElementById('di').value=d;go()}
+function replan(d){document.getElementById('di').value=d;closePanel();go()}
+function reset(){document.getElementById('rs').style.display='none';document.getElementById('di').value='';window.scrollTo({top:0,behavior:'smooth'})}
+function switchDay(d){if(ctd)renderItin(ctd,String(d))}
+function toggleH(i){var c=document.getElementById('h'+i);var w=c.classList.contains('expanded');document.querySelectorAll('.hcard').forEach(function(x){x.classList.remove('expanded')});if(!w)c.classList.add('expanded')}
+function rate(type,n){document.getElementById('s'+type).querySelectorAll('.starb').forEach(function(b,i){b.classList.toggle('lit',i<n)})}
+var destEmojis={'paris':'\ud83d\uddfc','tokyo':'\u26e9\ufe0f','santorini':'\ud83c\udfdb\ufe0f','amalfi':'\ud83c\udf0a','new york':'\ud83d\uddfd','bali':'\ud83c\udf3a','default':'\u2708\ufe0f'};
+function getDestEmoji(d){d=d.toLowerCase();for(var k in destEmojis)if(d.indexOf(k)>-1)return destEmojis[k];return destEmojis['default']}
+function calcTier(t){if(t===0)return'Explorer';if(t<3)return'Wanderer';if(t<7)return'Adventurer';return'Gold Traveller'}
+function refreshStats(){try{var h=JSON.parse(LS.getItem('voy_history')||'[]');document.getElementById('stat-trips').textContent=h.length;var c=new Set();h.forEach(function(t){var p=t.dest.split(',');c.add((p[p.length-1]||p[0]).trim().toLowerCase())});document.getElementById('stat-countries').textContent=c.size;var r=h.filter(function(t){return t.rating>0}).map(function(t){return t.rating});document.getElementById('stat-rating').textContent=r.length?(r.reduce(function(a,b){return a+b},0)/r.length).toFixed(1):'\u2014';document.getElementById('pp-tier-display').textContent=calcTier(h.length)}catch(e){}}
+function renderHistory(){try{var h=JSON.parse(LS.getItem('voy_history')||'[]');var c=document.getElementById('history-list-container'),s=document.getElementById('history-subtitle');if(!c)return;if(!h.length){c.innerHTML='<div style="padding:24px 0;text-align:center;color:var(--dim);font-size:0.78rem">No trips yet. Plan and review a trip!</div>';return}if(s)s.textContent=h.length+' trip'+(h.length!==1?'s':'');c.innerHTML=h.slice().reverse().map(function(t){var stars='';for(var i=1;i<=5;i++)stars+=i<=t.rating?'\u2605':'\u2606';return'<div class="h-card" onclick="replan(\''+t.dest.replace(/'/g,"\\'")+'\')"><div class="h-em">'+getDestEmoji(t.dest)+'</div><div class="h-inf"><div class="h-dest">'+t.dest+'</div><div class="h-meta">'+t.date+' \u00b7 '+t.nights+'n \u00b7 '+t.type+(t.dnaUpdated?' \u00b7 \ud83e\uddec DNA updated':'')+'</div></div><div class="h-stars">'+stars+'</div></div>'}).join('')}catch(e){}}
+
+// ═══ ENHANCED REVIEW: SAVE & TEACH ═══
+function saveReview(){
+  var loved=[],disliked=[],changes=[];
+  document.querySelectorAll('#review-loved .ptag.selected').forEach(function(el){loved.push(el.textContent.trim())});
+  document.querySelectorAll('#review-disliked .ptag.selected').forEach(function(el){disliked.push(el.textContent.trim())});
+  var lovedText=(document.getElementById('rv-loved-text').value||'').trim();
+  var dislikedText=(document.getElementById('rv-disliked-text').value||'').trim();
+  var changeText=(document.getElementById('rv-change-text').value||'').trim();
+  var oall=document.querySelectorAll('#soall .starb.lit').length;
+  if(!oall){var m=document.getElementById('psaved');m.textContent='\u26a0 Please rate your overall trip.';m.style.color='#e06050';m.style.background='rgba(224,96,80,0.08)';m.style.display='block';setTimeout(function(){m.style.display='none'},3e3);return}
+  // Save to history
+  var h=JSON.parse(LS.getItem('voy_history')||'[]');var now=new Date();
+  h.push({dest:cdest||'Unknown',date:now.toLocaleString('default',{month:'short',year:'numeric'}),nights:parseInt(document.getElementById('ns').value)||1,type:ttype,rating:oall,hotelRating:document.querySelectorAll('#shotel .starb.lit').length,paceRating:document.querySelectorAll('#space .starb.lit').length,loved:loved,lovedText:lovedText,disliked:disliked,dislikedText:dislikedText,changeText:changeText,dnaUpdated:true,saved:now.toISOString()});
+  LS.setItem('voy_history',JSON.stringify(h));
+  // ── Teach DNA from this review ──
+  var dna;try{dna=JSON.parse(LS.getItem('voy_dna')||'{}')||{}}catch(e){dna={}}
+  dna.loves=dna.loves||[];dna.dislikes=dna.dislikes||[];dna.changes=dna.changes||[];dna.tripInsights=dna.tripInsights||[];
+  loved.forEach(function(l){if(dna.loves.indexOf(l)===-1)dna.loves.push(l)});
+  if(lovedText&&dna.loves.indexOf(lovedText)===-1)dna.loves.push(lovedText);
+  disliked.forEach(function(d){if(dna.dislikes.indexOf(d)===-1)dna.dislikes.push(d)});
+  if(dislikedText&&dna.dislikes.indexOf(dislikedText)===-1)dna.dislikes.push(dislikedText);
+  if(changeText&&dna.changes.indexOf(changeText)===-1)dna.changes.push(changeText);
+  if(dna.loves.length>15)dna.loves=dna.loves.slice(-15);
+  if(dna.dislikes.length>15)dna.dislikes=dna.dislikes.slice(-15);
+  if(dna.changes.length>10)dna.changes=dna.changes.slice(-10);
+  dna.tripsLearned=(dna.tripsLearned||0)+1;
+  LS.setItem('voy_dna',JSON.stringify(dna));
+  updateDNAProgress();computeArchetype();refreshStats();renderHistory();
+
+  // ── Ask AI to extract deeper insights ──
+  var insightEl=document.getElementById('rv-insights'),contentEl=document.getElementById('rv-insight-content');
+  var reviewSummary='Trip to '+cdest+' ('+ttype+', '+oall+'/5 stars).\nLoved: '+loved.join(', ')+(lovedText?' - "'+lovedText+'"':'')+'\nDisliked: '+disliked.join(', ')+(dislikedText?' - "'+dislikedText+'"':'')+'\nWould change: '+(changeText||'nothing mentioned');
+  var el=document.getElementById('psaved');
+  el.textContent='\u2713 Trip saved! Analysing your feedback to update your DNA\u2026';
+  el.style.color='var(--gold)';el.style.background='rgba(201,168,76,0.08)';el.style.display='block';
+
+  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:apiHeaders(),body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,messages:[{role:'user',content:'A traveller just reviewed their trip. Extract 3-5 concise preference insights I should remember for their future trips. Be specific and actionable.\n\nReview:\n'+reviewSummary+'\n\nRespond ONLY with JSON: {"insights":["insight 1","insight 2","insight 3"]}'}]})}).then(function(r){return r.json()}).then(function(data){
+    var txt=data.content.map(function(c){return c.text||''}).join('').replace(/```json|```/g,'').trim();
+    var parsed;try{parsed=safeParseJSON(txt)}catch(ex){parsed={insights:[]};}
+    if(parsed.insights&&parsed.insights.length){
+      parsed.insights.forEach(function(i){if(dna.tripInsights.indexOf(i)===-1)dna.tripInsights.push(i)});
+      if(dna.tripInsights.length>20)dna.tripInsights=dna.tripInsights.slice(-20);
+      LS.setItem('voy_dna',JSON.stringify(dna));
+      contentEl.innerHTML=parsed.insights.map(function(i){return'<div class="rv-insight-item"><span class="ico">\ud83e\udde0</span><span>'+i+'</span></div>'}).join('');
+      insightEl.style.display='block';
+      el.textContent='\u2713 DNA updated with '+parsed.insights.length+' new insights! Returning home\u2026 \ud83e\uddec';
+      el.style.color='#50c878';el.style.background='rgba(80,200,120,0.08)';
+    }else{
+      el.textContent='\u2713 Trip saved & DNA updated! Returning home\u2026';
+      el.style.color='#50c878';el.style.background='rgba(80,200,120,0.08)';
+    }
+    setTimeout(finishReview,2200);
+  }).catch(function(){
+    el.textContent='\u2713 Trip saved & DNA updated from your tags! Returning home\u2026';
+    el.style.color='#50c878';el.style.background='rgba(80,200,120,0.08)';
+    setTimeout(finishReview,1800);
+  });
+}
+function finishReview(){
+  // Reset the review form
+  document.querySelectorAll('#review-loved .ptag, #review-disliked .ptag').forEach(function(t){t.classList.remove('selected')});
+  ['rv-loved-text','rv-disliked-text','rv-change-text'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=''});
+  ['soall','shotel','space'].forEach(function(id){var el=document.getElementById(id);if(el)el.querySelectorAll('.starb').forEach(function(s){s.classList.remove('lit')})});
+  document.getElementById('rv-insights').style.display='none';
+  document.getElementById('psaved').style.display='none';
+  // Return to the home/search page
+  goMode('plan');
+  reset();
 }
 
-x and y are positions from 0 to 1 (0,0 = top left, 1,1 = bottom right). Place them precisely over the actual fishing spots you see.
-rating must be one of: "Excellent", "Good", "Fair", or "Poor".
-If the image is NOT a body of water, set isWater to false and return empty spots array.`
-                    }
-                  ]
-                }]
-              })
-            });
-
-            const data = await resp.json();
-            const raw = data.content.map(i => i.text || '').join('');
-            const clean = raw.replace(/```json|```/g, '').trim();
-            const result = JSON.parse(clean);
-
-            const canvas = document.getElementById('overlay-canvas');
-            canvas.width = img.offsetWidth;
-            canvas.height = img.offsetHeight;
-
-            if (!result.isWater) {
-              document.getElementById('analysis-box').innerHTML = `
-                <div style="font-family:Arial,sans-serif;color:#c8ddb8">
-                  <b style="color:#e88a6a">⚠️ No water detected</b><br><br>
-                  This doesn't look like a river or lake. Try uploading a photo of the water you're fishing!
-                </div>`;
-              return;
-            }
-
-            drawSpots(canvas, result.spots);
-
-            const ratingColor = { Excellent:'#8db87a', Good:'#a5cf90', Fair:'#d4a843', Poor:'#e88a6a' }[result.rating] || '#8db87a';
-            let spotsHTML = result.spots.map(s => `
-              <div style="margin-bottom:14px">
-                <b style="color:#8db87a">📍 Spot ${s.label} — ${s.name}</b><br>
-                <span style="color:#c8ddb8">${s.reason}</span>
-              </div>`).join('');
-
-            document.getElementById('analysis-box').innerHTML = `
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-                <span style="font-size:1.4rem">🐟</span>
-                <strong style="color:#8db87a;font-family:Arial,sans-serif">AI Analysis</strong>
-                <span style="margin-left:auto;background:${ratingColor};color:#1a1f14;padding:4px 14px;border-radius:20px;font-size:0.8rem;font-weight:bold;font-family:Arial,sans-serif">${result.rating}</span>
-              </div>
-              <div style="color:#c8ddb8;font-family:Arial,sans-serif;font-size:0.95rem;line-height:1.8">
-                ${spotsHTML}
-                <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(141,184,122,0.2);color:#a89f8c">${result.overall}</div>
-              </div>`;
-
-          } catch(err) {
-            document.getElementById('analysis-box').innerHTML = `<div style="color:#e88a6a;font-family:Arial,sans-serif;padding:16px">Something went wrong with the analysis. Please try again.</div>`;
-          }
-        };
-      };
-      reader.readAsDataURL(file);
+function goMode(m){document.querySelectorAll('.mtab').forEach(function(t,i){t.classList.toggle('active',(m==='plan'&&i===0)||(m==='companion'&&i===1)||(m==='review'&&i===2))});document.getElementById('mplan').style.display=m==='plan'?'block':'none';document.getElementById('mcompanion').style.display=m==='companion'?'block':'none';document.getElementById('mreview').style.display=m==='review'?'block':'none'}
+function validate(dest){return fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:apiHeaders(),body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:80,messages:[{role:'user',content:'Is "'+dest+'" a real travel destination? Reply ONLY JSON: {"valid":true,"name":"Canonical Name"} or {"valid":false}.'}]})}).then(function(r){if(r.status===401||r.status===403){maybePromptKey();throw new Error('auth')}return r.json()}).then(function(d){var t=d.content.map(function(c){return c.text||''}).join('').replace(/```json|```/g,'').trim();var res=JSON.parse(t);if(res.valid&&res.name)document.getElementById('di').value=res.name;return res.valid===true}).catch(function(){return true})}
+function askC(){var q=document.getElementById('cq').value.trim();if(!q)return;var a=document.getElementById('cans');a.style.display='block';a.textContent='Thinking...';fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:apiHeaders(),body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:400,messages:[{role:'user',content:'I am in '+cdest+' as a '+ttype+' traveler. "'+q+'". Short, specific answer. Name real places.'+buildDNAPromptText()}]})}).then(function(r){if(r.status===401||r.status===403){maybePromptKey();throw new Error('auth')}return r.json()}).then(function(d){a.textContent=d.content.map(function(c){return c.text||''}).join('');document.getElementById('cq').value=''}).catch(function(){a.textContent='Unable to connect. If you opened this file directly, click the key icon to add your Anthropic API key.'})}
+function go(){var dest=document.getElementById('di').value.trim(),nr=document.getElementById('ns').value.trim();if(!dest){document.getElementById('derr').textContent='Please enter a destination.';document.getElementById('derr').style.display='block';return}var nights=parseInt(nr);if(!nr||isNaN(nights)||nights<1){document.getElementById('derr').textContent='Please enter how many nights.';document.getElementById('derr').style.display='block';return}document.getElementById('derr').style.display='none';var btn=document.getElementById('sbtn');btn.textContent='Checking...';btn.disabled=true;validate(dest).then(function(ok){btn.textContent='Plan My Trip \u2197';btn.disabled=false;if(!ok){document.getElementById('derr').textContent='"'+dest+'" doesn\'t appear to be a real destination.';document.getElementById('derr').style.display='block';return}document.getElementById('derr').style.display='none';var d=document.getElementById('di').value.trim();cdest=d;document.getElementById('dlbl').textContent=d;document.getElementById('rdest').textContent=d;document.getElementById('ccity').textContent=d;document.getElementById('cbtn').style.display='block';document.getElementById('ibtn').style.display='block';var al=document.getElementById('talert');if(ttype==='family'){document.getElementById('talerttext').textContent='Family pace: max 2 activities/day.';al.classList.add('show')}else al.classList.remove('show');aiTrip(d,nights)})}
+function safeParseJSON(raw){
+  if(!raw||typeof raw!=='string')throw new Error('Empty response');
+  var s=raw.replace(/```json|```/g,'').trim();
+  try{return JSON.parse(s)}catch(e){}
+  var start=s.indexOf('{');if(start===-1)start=s.indexOf('[');
+  if(start===-1)throw new Error('No JSON found in response');
+  s=s.slice(start);
+  try{return JSON.parse(s)}catch(e){}
+  // find balanced closing brace
+  var depth=0,inStr=false,esc=false,lastClose=-1;
+  for(var i=0;i<s.length;i++){var c=s[i];if(esc){esc=false;continue}if(c==='\\'){esc=true;continue}if(c==='"'){inStr=!inStr;continue}if(inStr)continue;if(c==='{'||c==='[')depth++;else if(c==='}'||c===']'){depth--;if(depth===0){lastClose=i;break}}}
+  if(lastClose!==-1){try{return JSON.parse(s.slice(0,lastClose+1))}catch(e){}}
+  // last resort: close open structures
+  var opens=[];inStr=false;esc=false;
+  for(var i=0;i<s.length;i++){var c=s[i];if(esc){esc=false;continue}if(c==='\\'){esc=true;continue}if(c==='"'){inStr=!inStr;continue}if(inStr)continue;if(c==='{')opens.push('}');else if(c==='[')opens.push(']');else if(c==='}'||c===']')opens.pop()}
+  if(inStr)s+='"';
+  s=s.replace(/,\s*$/,'');
+  while(opens.length)s+=opens.pop();
+  try{return JSON.parse(s)}catch(e){}
+  throw new Error('Could not parse response as JSON');
+}
+function callAI(prompt,tokens){
+  return fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:apiHeaders(),body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:tokens,messages:[{role:'user',content:prompt}]})}).then(function(r){
+    if(r.status===401||r.status===403){maybePromptKey();throw new Error('Authentication failed — please enter your API key')}
+    if(!r.ok)throw new Error('API returned status '+r.status);
+    return r.json();
+  }).then(function(d){
+    if(d.error)throw new Error(d.error.message||'API error');
+    if(!d.content||!d.content.length)throw new Error('Empty API response');
+    var txt=d.content.map(function(c){return c.text||''}).join('');
+    if(!txt.trim())throw new Error('No text in response');
+    return txt;
+  }).catch(function(err){
+    if(/Failed to fetch|NetworkError/i.test(err.message))maybePromptKey();
+    throw err;
+  });
+}
+function aiTrip(dest,nights){document.getElementById('rsub').textContent='Building your '+nights+'-night '+ttype+' trip\u2026';document.getElementById('rs').style.display='block';document.getElementById('rs').scrollIntoView({behavior:'smooth'});document.getElementById('ib').innerHTML='<div class="lw"><p>AI crafting itinerary\u2026</p><div class="lb"><div class="lf"></div></div></div>';document.getElementById('hstack').innerHTML='<div class="lw"><p>Finding hotels\u2026</p><div class="lb"><div class="lf"></div></div></div>';document.getElementById('dtabs').innerHTML='';goMode('plan');buildNearby(dest);buildQQs();var sg={solo:'hidden gems, solo-friendly cafés, authentic local restaurants, street food stalls',friends:'group energy, nightlife, shareable restaurants, rooftop bars, food markets',family:'child-friendly, family restaurants with kids menus, casual dining, ice cream spots, max 2 activities/day',business:'efficient, upscale client dining, power lunch spots, hotel bars, fine dining',romantic:'intimate, candlelit restaurants, sunset dinner spots, wine bars, tasting menus'}[ttype]||'balanced mix of sightseeing and local food';var dna=buildDNAPromptText();
+  callAI('Return ONLY raw JSON, no markdown.\nCreate a '+nights+'-day itinerary for '+dest+' for a '+ttype+' traveller ('+sg+').\nRules:\n- Each day MUST include 4-5 entries: a mix of activities AND food recommendations.\n- Include at least one specific restaurant or food spot per day for lunch AND dinner. Name REAL restaurants/cafés/street food stalls that exist in '+dest+'.\n- Breakfast spots or café recommendations are a bonus.\n- For each food entry: name the real restaurant, give the address or neighbourhood, mention a signature dish or what to order, and include a price estimate.\n- Use tags like: Breakfast, Lunch, Dinner, Street Food, Café, Fine Dining, Casual Eats, Bar, Food Market — alongside activity tags like Culture, Nature, Sightseeing, etc.\n- Activities should still be real places with practical tips.\nJSON structure: {"days":{"1":[{"time":"Morning · 9am","title":"...","desc":"...","tag":"Sightseeing"},{"time":"Lunch · 12:30pm","title":"...","desc":"Name the restaurant, address, what to order, price range.","tag":"Lunch"}]}}'+dna,Math.min(12000,Math.max(2500,nights*420))).then(function(raw){var p=safeParseJSON(raw);if(!p.days)throw new Error('No days');document.getElementById('rsub').textContent=nights+'-night \u00b7 '+ttype+' \u00b7 '+dest;document.getElementById('tnote').textContent='AI-crafted for '+ttype;renderItin(p.days,'1')  }).catch(function(e){console.error(e);document.getElementById('ib').innerHTML='<div style="padding:20px;color:var(--dim);line-height:1.7">Could not generate itinerary. If you opened this file directly (not in Claude), click the &#128273; key button in the top-right to add your Anthropic API key, then try again.</div>'});
+  callAI('Return ONLY raw JSON. 3 real hotels in '+dest+' for '+ttype+'.\nFor each hotel, include an "imgQuery" field: 2-3 words describing the hotel neighbourhood or a nearby landmark for finding a photo (e.g. "Shibuya crossing Tokyo", "Santorini caldera white buildings", "Central Park Manhattan skyline"). Use the area/landmark, NOT the hotel name.\nJSON: {"hotels":[{"name":"...","loc":"...","price":"$XXX","stars":"...","tags":["..."],"desc":"...","area":"...","bestFor":"...","breakfast":"...","cancel":"...","fit":"...","imgQuery":"..."}]}'+dna,1500).then(function(raw){var p=safeParseJSON(raw);if(p.hotels)renderHotels(p.hotels);else throw new Error('No hotels')}).catch(function(e){console.error(e);document.getElementById('hstack').innerHTML='<div style="padding:16px 0;color:var(--dim)">Find hotels on <a href="https://www.booking.com/searchresults.html?ss='+encodeURIComponent(dest)+'" target="_blank" style="color:var(--gold)">Booking.com</a></div>'})}
+function renderItin(itin,day){ctd=itin;var days=Object.keys(itin).sort(function(a,b){return+a-+b});document.getElementById('dtabs').innerHTML=days.map(function(d){return'<div class="dtab'+(d===day?' active':'')+'" onclick="switchDay(\''+d+'\')">Day '+d+'</div>'}).join('');var bl=itin[day]||itin[days[0]]||[];document.getElementById('ib').innerHTML=bl.map(function(b){var tag=b.tag||'';var tagLow=tag.toLowerCase();var ico='';var tagStyle='';if(/breakfast|brunch|café|cafe|coffee/i.test(tagLow)){ico='\u2615 ';tagStyle='background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.35);color:var(--gold)'}else if(/lunch|casual eat|street food|food market|snack/i.test(tagLow)){ico='\ud83c\udf5c ';tagStyle='background:rgba(80,200,120,0.08);border-color:rgba(80,200,120,0.3);color:#50c878'}else if(/dinner|fine dining|restaurant/i.test(tagLow)){ico='\ud83c\udf7d\ufe0f ';tagStyle='background:rgba(180,130,255,0.08);border-color:rgba(180,130,255,0.3);color:#b482ff'}else if(/bar|drinks|wine|cocktail|nightlife/i.test(tagLow)){ico='\ud83c\udf78 ';tagStyle='background:rgba(255,140,100,0.08);border-color:rgba(255,140,100,0.3);color:#ff8c64'}return'<div class="tb"><div class="tlbl">'+b.time+'</div><div class="tc"><h4>'+ico+b.title+'</h4><p>'+b.desc+'</p><span class="ttag" style="'+(tagStyle||'')+'">'+(tag)+'</span></div></div>'}).join('')||'<div style="padding:16px;color:var(--dim)">No activities.</div>';updateDayArrows()}
+function scrollDays(dir){var el=document.getElementById('dtabs');if(el)el.scrollBy({left:dir*180,behavior:'smooth'})}
+function updateDayArrows(){var el=document.getElementById('dtabs'),l=document.getElementById('dtab-left'),r=document.getElementById('dtab-right');if(!el||!l||!r)return;var s=el.scrollWidth>el.clientWidth+4;l.classList.toggle('show',s);r.classList.toggle('show',s)}
+function fetchHotelPhoto(query,tid,bid){
+  var attempts=[query,query.split(' ').slice(0,2).join(' ')+' tourism'];
+  function tryFetch(idx){
+    if(idx>=attempts.length)return;
+    fetch('https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(attempts[idx])+'&gsrlimit=8&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&origin=*').then(function(r){return r.json()}).then(function(d){
+      var p=d.query&&d.query.pages;if(!p){tryFetch(idx+1);return}
+      var ks=Object.keys(p);
+      for(var k=0;k<ks.length;k++){
+        var pg=p[ks[k]];
+        if(!pg.imageinfo||!pg.imageinfo[0]||!pg.imageinfo[0].thumburl)continue;
+        var title=(pg.title||'').toLowerCase();
+        if(/\.(svg|pdf|ogg|ogv|webm|tif|xcf|djvu|mid|stl)$/i.test(title))continue;
+        if(/flag|coat.of.arms|icon|logo|map|diagram|sign|seal/i.test(title))continue;
+        var u=pg.imageinfo[0].thumburl;
+        var t=document.getElementById(tid),b=document.getElementById(bid);
+        if(t){t.onload=function(){this.style.display='block'};t.onerror=function(){};t.src=u}
+        if(b){b.onload=function(){this.style.display='block'};b.onerror=function(){};b.src=u}
+        return;
+      }
+      tryFetch(idx+1);
+    }).catch(function(){tryFetch(idx+1)});
+  }
+  tryFetch(0);
+}
+function renderHotels(hotels){var g=['linear-gradient(135deg,#1f4a63,#3fb6c4)','linear-gradient(135deg,#c4604a,#f0a85a)','linear-gradient(135deg,#1f5a52,#5fa86a)'];document.getElementById('hstack').innerHTML=hotels.map(function(h,i){var bg=g[i%g.length];var su='https://www.google.com/travel/hotels/'+encodeURIComponent(h.name+' '+h.loc),bu='https://www.booking.com/search.html?ss='+encodeURIComponent(h.name+' '+h.loc);var thumb='<div style="width:68px;height:52px;background:'+bg+';flex-shrink:0;overflow:hidden;position:relative;border-radius:3px"><img id="hthumb'+i+'" referrerpolicy="no-referrer" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0"></div>';var bigimg='<div style="width:100%;height:190px;background:'+bg+';overflow:hidden;position:relative"><img id="hbig'+i+'" referrerpolicy="no-referrer" style="display:none;width:100%;height:190px;object-fit:cover"></div>';return'<div class="hcard" id="h'+i+'" onclick="toggleH('+i+')"><div class="hct">'+thumb+'<div class="hci"><div class="hn">'+h.name+'</div><div class="hl">\ud83d\udccd '+h.loc+'</div><div class="hst">'+(h.stars||'')+'</div></div><div class="hpr"><div class="amt">'+h.price+'</div><div class="per">/night</div></div></div><div class="htgs">'+(h.tags||[]).map(function(t){return'<span class="htg">'+t+'</span>'}).join('')+'</div><div class="hexp">'+bigimg+'<div class="heb"><p>'+h.desc+'</p><div class="hed"><div class="hd"><label>Area</label><span>'+h.area+'</span></div><div class="hd"><label>Best For</label><span>'+h.bestFor+'</span></div><div class="hd"><label>Breakfast</label><span>'+h.breakfast+'</span></div><div class="hd"><label>Cancel</label><span>'+h.cancel+'</span></div><div class="hfit">\u2713 '+h.fit+'</div></div><div class="hbr"><button class="bbtn" onclick="event.stopPropagation();window.open(\''+su+'\',\'_blank\')">Check Availability \u2197</button><button class="bbtn2" onclick="event.stopPropagation();window.open(\''+bu+'\',\'_blank\')">Booking.com</button></div></div></div></div>'}).join('');hotels.forEach(function(h,i){var q=h.imgQuery||(h.area+' '+(h.loc||'').split(',').pop().trim());fetchHotelPhoto(q,'hthumb'+i,'hbig'+i)})}
+function buildQQs(){var qq=["What's open right now?","It's raining \u2014 new plan?","I have 90 minutes","Best lunch nearby","Local secret spots"];document.getElementById('qqs').innerHTML=qq.map(function(q){return'<button style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);color:var(--text2);padding:7px 14px;font-family:Inter,sans-serif;font-size:0.72rem;cursor:pointer" onclick="document.getElementById(\'cq\').value=\''+q.replace(/'/g,"\\'")+'\';askC()">'+q+'</button>'}).join('')}
+function buildNearby(dest){var map={paris:[{t:'Caf\u00e9',n:'Ten Belles',d:'12 min'},{t:'Museum',n:'Centre Pompidou',d:'18 min'},{t:'Garden',n:'Luxembourg',d:'20 min'}],tokyo:[{t:'Temple',n:'Senso-ji',d:'5 min'},{t:'Market',n:'Tsukiji',d:'25 min'},{t:'Garden',n:'Shinjuku Gyoen',d:'10 min'}]};var key=dest.toLowerCase(),nb=null;for(var k in map)if(key.indexOf(k)>-1){nb=map[k];break}if(!nb)nb=[{t:'Explore',n:'Ask the companion!',d:'Nearby'}];document.getElementById('nbg').innerHTML=nb.map(function(n){return'<div class="nc"><div class="nct">'+n.t+'</div><div class="ncn">'+n.n+'</div><div class="ncd">'+n.d+'</div></div>'}).join('')}
+// ── MAP (Google Maps) ──
+var gMap=null,gMarkers=[],gInfoWin=null;
+function getGKey(){return LS.getItem('voy_gmaps_key')||''}
+function saveKeyAndLoad(){
+  var key=document.getElementById('gmaps-key-input').value.trim();
+  if(!key){document.getElementById('gmaps-key-input').style.borderColor='#e06050';return}
+  LS.setItem('voy_gmaps_key',key);
+  document.getElementById('key-saved-badge').style.display='inline-flex';
+  startMapLoad(key);
+}
+function loadGMaps(key,cb){
+  if(window.google&&window.google.maps){cb();return}
+  window._gmCb=cb;
+  var sc=document.createElement('script');
+  sc.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(key)+'&callback=_gmReady';
+  sc.onerror=function(){
+    document.getElementById('map-status').innerHTML='<p style="color:#e06050">Failed to load Google Maps. Check your API key and make sure Maps JavaScript API is enabled.</p><button onclick="showKeyPanel()" style="margin-top:12px;padding:8px 20px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:Inter,sans-serif;font-size:0.72rem;cursor:pointer">Re-enter Key</button>';
+    document.getElementById('map-status').style.display='block';
+  };
+  document.head.appendChild(sc);
+}
+window._gmReady=function(){if(window._gmCb)window._gmCb()};
+function showKeyPanel(){
+  document.getElementById('map-key-panel').style.display='flex';
+  document.getElementById('map-status').style.display='none';
+  document.getElementById('map-container').style.display='none';
+  var key=getGKey();
+  if(key){document.getElementById('gmaps-key-input').value=key;document.getElementById('key-saved-badge').style.display='inline-flex'}
+}
+function openMap(){
+  if(!ctd&&!cdest)return;
+  var ov=document.getElementById('map-ov');ov.style.display='flex';
+  document.getElementById('map-dest').textContent=cdest||'Trip';
+  useFreeMaps();
+}
+function startMapLoad(key){
+  document.getElementById('map-key-panel').style.display='none';
+  document.getElementById('map-status').innerHTML='<p>&#128506; Finding coordinates for all your spots\u2026</p><div class="lb"><div class="lf"></div></div>';
+  document.getElementById('map-status').style.display='block';
+  document.getElementById('map-container').style.display='none';
+  var places=collectPlaces();
+  if(!places.length){document.getElementById('map-status').innerHTML='<p>No places to map yet. Plan a trip first.</p>';return}
+  var prompt='Return ONLY raw JSON.\nI need real, accurate latitude and longitude for these places in '+cdest+':\n';
+  places.forEach(function(p,i){prompt+=(i+1)+'. '+p.name+'\n'});
+  prompt+='\nJSON: {"coords":[{"lat":number,"lng":number}]}\nOne per place, same order. Precise real coordinates.';
+  callAI(prompt,1200).then(function(raw){
+    var parsed=safeParseJSON(raw);
+    if(parsed.coords){places.forEach(function(p,i){if(parsed.coords[i]){p.lat=parsed.coords[i].lat;p.lng=parsed.coords[i].lng}})}
+    loadGMaps(key,function(){renderGMap(places)});
+  }).catch(function(e){console.error(e);document.getElementById('map-status').innerHTML='<p style="color:#e06050">Could not fetch coordinates.</p><button onclick="startMapLoad(getGKey())" style="margin-top:12px;padding:8px 20px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:Inter,sans-serif;font-size:0.72rem;cursor:pointer">Retry</button>';document.getElementById('map-status').style.display='block'});
+}
+function closeMap(){document.getElementById('map-ov').style.display='none'}
+function useFreeMaps(){
+  document.getElementById('map-key-panel').style.display='none';
+  document.getElementById('map-status').innerHTML='<p>&#127758; Loading free map\u2026</p><div class="lb"><div class="lf"></div></div>';
+  document.getElementById('map-status').style.display='block';
+  document.getElementById('map-container').style.display='none';
+  var places=collectPlaces();
+  if(!places.length){document.getElementById('map-status').innerHTML='<p>No places to map yet.</p>';return}
+  var prompt='Return ONLY raw JSON.\nLatitude and longitude for these places in '+cdest+':\n';
+  places.forEach(function(p,i){prompt+=(i+1)+'. '+p.name+'\n'});
+  prompt+='\nJSON: {"coords":[{"lat":number,"lng":number}]}\nOne per place, same order.';
+  callAI(prompt,1200).then(function(raw){
+    var parsed=safeParseJSON(raw);
+    if(parsed.coords){places.forEach(function(p,i){if(parsed.coords[i]){p.lat=parsed.coords[i].lat;p.lng=parsed.coords[i].lng}})}
+    loadLeaflet(function(){renderFreeMap(places)});
+  }).catch(function(e){console.error(e);document.getElementById('map-status').innerHTML='<p style="color:#e06050">Could not fetch coordinates.</p><button onclick="useFreeMaps()" style="margin-top:12px;padding:8px 20px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:Inter,sans-serif;font-size:0.72rem;cursor:pointer">Retry</button>';document.getElementById('map-status').style.display='block'});
+}
+function loadLeaflet(cb){
+  if(window.L){cb();return}
+  var lk=document.createElement('link');lk.rel='stylesheet';lk.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';document.head.appendChild(lk);
+  var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';sc.onload=cb;sc.onerror=function(){document.getElementById('map-status').innerHTML='<p style="color:#e06050">Could not load map library.</p>';document.getElementById('map-status').style.display='block'};document.head.appendChild(sc);
+}
+var leafletMap=null;
+function renderFreeMap(places){
+  var el=document.getElementById('map-container');var st=document.getElementById('map-status');
+  st.style.display='none';el.style.display='block';
+  if(leafletMap){leafletMap.remove();leafletMap=null}
+  leafletMap=L.map('map-container',{zoomControl:true});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:19}).addTo(leafletMap);
+  var colors={hotel:'#c9a84c',food:'#50c878',activity:'#6ea8fe'};
+  var labels={hotel:'Hotel',food:'Food & Drinks',activity:'Activity'};
+  var glyphs={hotel:'\ud83c\udfe8',food:'\ud83c\udf7d\ufe0f',activity:'\ud83d\udccd'};
+  var bounds=[];
+  places.forEach(function(p){
+    if(!p.lat||!p.lng)return;
+    var c=colors[p.type]||colors.activity;var sz=p.type==='hotel'?20:15;
+    var icon=L.divIcon({className:'voy-pin',html:'<div style="width:'+sz+'px;height:'+sz+'px;background:'+c+';border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],popupAnchor:[0,-sz/2-4]});
+    var m=L.marker([p.lat,p.lng],{icon:icon}).addTo(leafletMap);
+    var popup='<div style="min-width:160px;font-family:Inter,sans-serif"><div style="font-size:0.6rem;letter-spacing:1.5px;text-transform:uppercase;color:'+c+';margin-bottom:3px;font-weight:600">'+glyphs[p.type]+' '+labels[p.type]+(p.day?' &middot; Day '+p.day:'')+'</div><div style="font-size:0.88rem;font-weight:600;color:#222;margin-bottom:3px">'+p.name+'</div>';
+    if(p.tag&&p.tag!=='Hotel')popup+='<div style="font-size:0.68rem;color:#888">'+p.tag+'</div>';
+    if(p.time)popup+='<div style="font-size:0.65rem;color:#aaa;margin-top:2px">'+p.time+'</div>';
+    popup+='</div>';
+    m.bindPopup(popup,{maxWidth:260});
+    bounds.push([p.lat,p.lng]);
+  });
+  // Keep pins a near-constant screen size — counter-scale them against zoom so they
+  // only shrink/grow a tiny bit instead of following the map 1:1.
+  function rescalePins(){
+    var z=leafletMap.getZoom();
+    var base=leafletMap._voyBaseZoom||(leafletMap._voyBaseZoom=z);
+    // gentle scaling: 4% per zoom level, clamped so pins never get tiny or huge
+    var s=Math.pow(1.04,z-base);
+    s=Math.max(0.85,Math.min(1.25,s));
+    document.querySelectorAll('#map-container .voy-pin > div').forEach(function(d){
+      d.style.transform='scale('+s+')';
+      d.style.transformOrigin='center center';
     });
-
-    function drawSpots(canvas, spots) {
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      spots.forEach(s => {
-        const x = s.x * canvas.width, y = s.y * canvas.height;
-        // Outer glow
-        ctx.beginPath();
-        ctx.arc(x, y, 28, 0, Math.PI*2);
-        ctx.strokeStyle = 'rgba(141,184,122,0.4)';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        // Inner circle
-        ctx.beginPath();
-        ctx.arc(x, y, 18, 0, Math.PI*2);
-        ctx.fillStyle = 'rgba(141,184,122,0.25)';
-        ctx.fill();
-        ctx.strokeStyle = '#8db87a';
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-        // Label
-        ctx.font = 'bold 14px Arial';
-        ctx.fillStyle = '#fff';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(s.label, x, y);
-      });
-    }
-
-    function resetDemo() {
-      document.getElementById('upload-prompt').style.display = 'block';
-      document.getElementById('demo-result').style.display = 'none';
-      document.getElementById('photo-input').value = '';
-    }
-  </script>
-
-  <div class="features-bg">
-    <div class="section">
-      <div class="section-label">Features</div>
-      <h2>Built for real anglers</h2>
-      <div class="features">
-        <div class="feature">
-          <div class="feature-icon">📍</div>
-          <div>
-            <h3>Visual Cast Markers</h3>
-            <p>Circles and arrows drawn right on your photo show the prime spots at a glance.</p>
-          </div>
-        </div>
-        <div class="feature">
-          <div class="feature-icon">📖</div>
-          <div>
-            <h3>Plain-English Analysis</h3>
-            <p>A written breakdown explains exactly why each spot is good — or tells you to move on.</p>
-          </div>
-        </div>
-        <div class="feature">
-          <div class="feature-icon">🏞️</div>
-          <div>
-            <h3>Freshwater Focused</h3>
-            <p>Trained for rivers, streams, and lakes. It knows the difference between a riffle and a run.</p>
-          </div>
-        </div>
-        <div class="feature">
-          <div class="feature-icon">📵</div>
-          <div>
-            <h3>Works Anywhere</h3>
-            <p>No app download needed. Open it in your phone's browser, even in low-signal areas.</p>
-          </div>
-        </div>
-        <div class="feature">
-          <div class="feature-icon">⚡</div>
-          <div>
-            <h3>Results in Seconds</h3>
-            <p>Get your analysis fast so you spend more time fishing and less time guessing.</p>
-          </div>
-        </div>
-        <div class="feature">
-          <div class="feature-icon">🆓</div>
-          <div>
-            <h3>Free to Try</h3>
-            <p>Get early access for free. No credit card, no commitment.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="cta-bottom">
-    <h2>Ready to find your fish? 🐟</h2>
-    <p>Join anglers getting early access to FishEye.</p>
-    <a href="#" class="btn-primary">Get Early Access — It's Free</a>
-  </div>
-
-  <footer>
-    © 2026 FishEye · Built with 🎣 and AI
-  </footer>
-
+  }
+  leafletMap.on('zoomend',rescalePins);
+  if(bounds.length>1)leafletMap.fitBounds(bounds,{padding:[50,50]});
+  else if(bounds.length===1)leafletMap.setView(bounds[0],14);
+  leafletMap._voyBaseZoom=leafletMap.getZoom();
+  rescalePins();
+  if(bounds.length>1){
+    var lats=bounds.map(function(b){return b[0]}),lngs=bounds.map(function(b){return b[1]});
+    var km=Math.max(Math.max.apply(null,lats)-Math.min.apply(null,lats),Math.max.apply(null,lngs)-Math.min.apply(null,lngs))*111;
+    var n=document.createElement('div');
+    n.style.cssText='position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(14,18,32,0.92);backdrop-filter:blur(8px);border:1px solid rgba(201,168,76,0.3);padding:10px 20px;font-family:Inter,sans-serif;font-size:0.78rem;color:#f5f0e8;border-radius:8px;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.3)';
+    if(km<3)n.innerHTML='\u2713 <strong>Walking distance</strong> \u2014 ~'+km.toFixed(1)+' km spread';
+    else if(km<10)n.innerHTML='\ud83d\ude95 <strong>~'+km.toFixed(0)+' km spread</strong> \u2014 taxis or transit recommended';
+    else n.innerHTML='\ud83d\ude97 <strong>~'+km.toFixed(0)+' km spread</strong> \u2014 consider renting a car';
+    el.appendChild(n);
+  }
+}
+function collectPlaces(){
+  var places=[];
+  if(ctd){Object.keys(ctd).forEach(function(day){(ctd[day]||[]).forEach(function(item){
+    var tag=(item.tag||'').toLowerCase();var type='activity';
+    if(/breakfast|brunch|caf[eé]|coffee/i.test(tag))type='food';
+    else if(/lunch|casual|street.?food|food.?market|snack/i.test(tag))type='food';
+    else if(/dinner|fine.?dining|restaurant|supper/i.test(tag))type='food';
+    else if(/bar|drinks|wine|cocktail|nightlife|pub|tapas/i.test(tag))type='food';
+    places.push({name:item.title,day:day,type:type,tag:item.tag||'',time:item.time||''});
+  })})}
+  document.querySelectorAll('.hcard').forEach(function(card){
+    var nm=card.querySelector('.hn');var loc=card.querySelector('.hl');
+    if(nm)places.push({name:nm.textContent+(loc?', '+loc.textContent.replace(/\ud83d\udccd\s*/,''):''),type:'hotel',tag:'Hotel',day:''});
+  });
+  return places;
+}
+function renderGMap(places){
+  var el=document.getElementById('map-container');var st=document.getElementById('map-status');
+  st.style.display='none';el.style.display='block';
+  var colors={hotel:'#c9a84c',food:'#50c878',activity:'#6ea8fe'};
+  var labels={hotel:'Hotel',food:'Food & Drinks',activity:'Activity'};
+  var glyphs={hotel:'\ud83c\udfe8',food:'\ud83c\udf7d',activity:'\ud83d\udccd'};
+  var valid=places.filter(function(p){return p.lat&&p.lng});
+  if(!valid.length){st.innerHTML='<p>No valid coordinates found. Try a different destination.</p>';st.style.display='block';el.style.display='none';return}
+  var center={lat:valid[0].lat,lng:valid[0].lng};
+  gMap=new google.maps.Map(el,{zoom:13,center:center,mapTypeControl:false,streetViewControl:false,fullscreenControl:true,styles:[{featureType:'poi',elementType:'labels',stylers:[{visibility:'off'}]}]});
+  gInfoWin=new google.maps.InfoWindow();
+  gMarkers.forEach(function(m){m.setMap(null)});gMarkers=[];
+  var bounds=new google.maps.LatLngBounds();
+  valid.forEach(function(p){
+    var c=colors[p.type]||colors.activity;
+    var sz=p.type==='hotel'?16:12;
+    var marker=new google.maps.Marker({
+      position:{lat:p.lat,lng:p.lng},
+      map:gMap,
+      title:p.name,
+      icon:{
+        path:google.maps.SymbolPath.CIRCLE,
+        fillColor:c,
+        fillOpacity:0.92,
+        strokeColor:'#ffffff',
+        strokeWeight:2.5,
+        scale:sz
+      },
+      zIndex:p.type==='hotel'?10:5
+    });
+    var content='<div style="min-width:180px;padding:4px"><div style="font-size:0.6rem;letter-spacing:1.5px;text-transform:uppercase;color:'+c+';margin-bottom:4px;font-weight:700">'+glyphs[p.type]+' '+labels[p.type]+(p.day?' &middot; Day '+p.day:'')+'</div><div style="font-size:0.92rem;font-weight:600;color:#222;margin-bottom:4px">'+p.name+'</div>';
+    if(p.tag&&p.tag!=='Hotel')content+='<div style="font-size:0.72rem;color:#666">'+p.tag+'</div>';
+    if(p.time)content+='<div style="font-size:0.66rem;color:#999;margin-top:3px">'+p.time+'</div>';
+    content+='</div>';
+    marker.addListener('click',function(){gInfoWin.setContent(content);gInfoWin.open(gMap,marker)});
+    gMarkers.push(marker);
+    bounds.extend(marker.getPosition());
+  });
+  if(valid.length>1)gMap.fitBounds(bounds,{top:50,bottom:70,left:50,right:50});
+  else gMap.setZoom(15);
+  // Distance / transport note
+  if(valid.length>1){
+    var lats=valid.map(function(p){return p.lat}),lngs=valid.map(function(p){return p.lng});
+    var latS=Math.max.apply(null,lats)-Math.min.apply(null,lats);
+    var lngS=Math.max.apply(null,lngs)-Math.min.apply(null,lngs);
+    var km=Math.max(latS,lngS)*111;
+    var noteDiv=document.createElement('div');
+    noteDiv.style.cssText='position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:10;background:rgba(14,18,32,0.92);backdrop-filter:blur(8px);border:1px solid rgba(201,168,76,0.3);padding:10px 20px;font-family:Inter,sans-serif;font-size:0.78rem;color:#f5f0e8;border-radius:8px;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.3)';
+    if(km<3)noteDiv.innerHTML='\u2713 <strong>Walking distance</strong> \u2014 everything within ~'+km.toFixed(1)+' km';
+    else if(km<10)noteDiv.innerHTML='\ud83d\ude95 <strong>Spread ~'+km.toFixed(0)+' km</strong> \u2014 taxis or transit recommended';
+    else noteDiv.innerHTML='\ud83d\ude97 <strong>Spread ~'+km.toFixed(0)+' km</strong> \u2014 consider renting a car';
+    el.style.position='relative';
+    el.appendChild(noteDiv);
+  }
+}
+// ── WELCOME BACK ──
+function welcomeBack(){
+  document.getElementById('wb-dest').textContent=cdest||'your trip';
+  document.getElementById('wb-emoji').textContent=getDestEmoji(cdest||'');
+  document.getElementById('wb-nights').textContent=document.getElementById('ns').value||'?';
+  document.getElementById('wb-style').textContent=ttype.charAt(0).toUpperCase()+ttype.slice(1);
+  var dna;try{dna=JSON.parse(LS.getItem('voy_dna')||'{}')}catch(e){dna={}}
+  var pts=0;['interests','dealbreakers'].forEach(function(k){if(dna[k])pts+=dna[k].length});['pace','budget','crowds'].forEach(function(k){if(dna[k])pts++});pts+=(dna.loves||[]).length+(dna.dislikes||[]).length+(dna.tripInsights||[]).length;
+  document.getElementById('wb-dna-count').textContent=pts;
+  var ov=document.getElementById('wb-ov');ov.style.display='flex';
+  // Reset review form for fresh input
+  document.querySelectorAll('#review-loved .ptag, #review-disliked .ptag').forEach(function(t){t.classList.remove('selected')});
+  ['rv-loved-text','rv-disliked-text','rv-change-text'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=''});
+  ['soall','shotel','space'].forEach(function(id){var el=document.getElementById(id);if(el)el.querySelectorAll('.starb').forEach(function(s){s.classList.remove('lit')})});
+  document.getElementById('rv-insights').style.display='none';
+  document.getElementById('psaved').style.display='none';
+}
+function closeWB(){document.getElementById('wb-ov').style.display='none'}
+showView('profile');initApp();
+</script>
 </body>
 </html>
